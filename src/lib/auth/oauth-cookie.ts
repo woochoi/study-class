@@ -32,7 +32,10 @@ export function safeReturnTo(raw: string | null | undefined): string {
     const base = 'http://local.invalid'
     const u = new URL(raw, base)
     if (u.origin !== base) return '/'
-    return u.pathname + u.search + u.hash
+    const result = u.pathname + u.search + u.hash
+    // dot-segment normalization can yield '//host' (protocol-relative)
+    if (!result.startsWith('/') || result.startsWith('//') || result.startsWith('/\\')) return '/'
+    return result
   } catch {
     return '/'
   }
