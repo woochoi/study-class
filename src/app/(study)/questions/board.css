@@ -20,3 +20,14 @@
 .study .board-form button{justify-self:start;font:inherit;background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:8px 18px;cursor:pointer}
 .study .board-form button:disabled{opacity:.6;cursor:default}
 .study .form-error{color:#c0392b;font-size:13px;margin:0}
+.study .q-detail{display:grid;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.study .q-detail h2{font-size:18px;overflow-wrap:anywhere;margin:0}
+.study .q-detail h2.deleted{color:var(--muted)}
+.study .body-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65}
+.study .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.study .inline-form{display:inline;margin:0}
+.study .btn-sub,.study .btn-danger{display:inline-block;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:4px 12px;background:var(--surface);color:var(--ink);text-decoration:none;cursor:pointer}
+.study .btn-danger{color:#c0392b}
+.study .answers-head{font-size:16px;margin:24px 0 10px}
+.study .a-list{list-style:none;margin:0 0 20px;padding:0;display:grid;gap:8px}
+.study .a-row{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-width:0;scroll-margin-top:16px}

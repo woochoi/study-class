@@ -25,18 +25,18 @@ export default function QuestionForm({
           {state.message}
         </p>
       )}
-      <label>
+      <label htmlFor="q-title">
         제목
-        <input name="title" defaultValue={v.title} maxLength={200} required aria-invalid={!!err.title} />
+        <input id="q-title" name="title" defaultValue={v.title} maxLength={200} required aria-invalid={!!err.title} />
       </label>
       {err.title && (
         <p className="form-error" role="alert">
           {err.title}
         </p>
       )}
-      <label>
+      <label htmlFor="q-body">
         내용
-        <textarea name="body" defaultValue={v.body} maxLength={5000} rows={10} required aria-invalid={!!err.body} />
+        <textarea id="q-body" name="body" defaultValue={v.body} maxLength={5000} rows={10} required aria-invalid={!!err.body} />
       </label>
       {err.body && (
         <p className="form-error" role="alert">

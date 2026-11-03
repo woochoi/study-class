@@ -71,18 +71,19 @@ export async function deleteQuestionAction(id: string): Promise<void> {
 
 export async function createAnswerAction(
   questionId: string,
-  _prev: { error?: string },
+  _prev: { error?: string; value?: string },
   formData: FormData,
-): Promise<{ error?: string }> {
+): Promise<{ error?: string; value?: string }> {
+  const value = text(formData, 'body')
   const user = await getCurrentUser()
-  if (!user) return { error: '로그인이 필요해요.' }
+  if (!user) return { error: '로그인이 필요해요.', value }
   const qid = parseId(questionId)
-  if (!qid) return { error: '글을 찾을 수 없어요.' }
-  const v = validateAnswer(text(formData, 'body'))
-  if (!v.ok) return { error: v.error }
+  if (!qid) return { error: '글을 찾을 수 없어요.', value }
+  const v = validateAnswer(value)
+  if (!v.ok) return { error: v.error, value }
   const r = await createAnswer(user.id, qid, v.value)
-  if (!r.ok) return { error: failState(r.reason, undefined).message }
-  redirect(`/questions/${qid}`)
+  if (!r.ok) return { error: failState(r.reason, undefined).message, value }
+  redirect(`/questions/${qid}#answer-${r.id}`)
 }
 
 export async function updateAnswerAction(
@@ -101,7 +102,7 @@ export async function updateAnswerAction(
   if (!r.ok) return { error: failState(r.reason, undefined).message, value }
   // Ruling R2: 질문 id는 답변에서 다시 읽는다.
   const a = await getAnswer(aid)
-  redirect(a ? `/questions/${a.questionId}` : '/questions')
+  redirect(a ? `/questions/${a.questionId}#answer-${aid}` : '/questions')
 }
 
 export async function deleteAnswerAction(answerId: string): Promise<void> {
