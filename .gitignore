@@ -1,0 +1,7 @@
+.env
+.env*.local
+!.env.example
+.superpowers/
+node_modules/
+.next/
+.DS_Store
