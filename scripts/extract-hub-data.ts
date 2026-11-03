@@ -12,10 +12,11 @@ function sliceInitializer(src: string, name: string): string {
     const ch = src[i]
     if (ch === "'" || ch === '"' || ch === '`') {
       i++
-      while (src[i] !== ch) {
+      while (i < src.length && src[i] !== ch) {
         if (src[i] === '\\') i++
         i++
       }
+      if (i >= src.length) throw new Error('unterminated string in hub script')
     } else if (ch === '/' && src[i + 1] === '/') {
       while (i < src.length && src[i] !== '\n') i++
     } else if (ch === '/' && src[i + 1] === '*') {

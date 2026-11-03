@@ -34,7 +34,7 @@ export function isoDate(v: string, where: string): string {
   return `${m[1]}-${m[2]}-${m[3]}`
 }
 
-const CHAPTER_RE = /^\s*제(\d+)장(의\d+)?\s+(.*)$/s
+const CHAPTER_RE = /^\s*제(\d+)장(의\d+)?\s+([\s\S]*)$/
 
 /** '제4장의2 가명정보… <신설 2020.8.4>' → { label, title }. 장이 아니면 null. */
 export function parseChapterHeading(text: string): { label: string; title: string } | null {
