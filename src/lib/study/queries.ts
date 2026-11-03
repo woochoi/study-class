@@ -1,6 +1,6 @@
 import 'server-only'
 import { query } from '../db.ts'
-import { compareArticleKeys } from '../law/article-key.ts'
+import { mergeUpcomingArticles, type UpcomingRow } from './chapters.ts'
 import type {
   Anchor, Area, Card, Chapter, HistoryEvent, Mnemonic, Unit, UserProgress,
 } from './types.ts'
@@ -14,8 +14,6 @@ export type StudyData = {
   lawChapters: Chapter[]
   decreeChapters: Chapter[]
 }
-
-type ChapterRow = { doc_id: string; label: string | null; title: string | null; key: string; atitle: string }
 
 async function loadChapters(where: string): Promise<{ docId: string | null; chapters: Chapter[] }> {
   const doc = await query<{ id: string }>(
@@ -45,21 +43,16 @@ async function loadChapters(where: string): Promise<{ docId: string | null; chap
   return { docId, chapters: out }
 }
 
-async function loadUpcomingOnly(currentDocId: string | null): Promise<ChapterRow[]> {
-  const r = await query<ChapterRow>(
-    `SELECT d.id::text AS doc_id, c.label, c.title, a.article_key AS key, a.title AS atitle
-       FROM law_documents d
-       JOIN articles a ON a.document_id = d.id
+async function loadUpcomingRows(): Promise<UpcomingRow[]> {
+  const r = await query<{ label: string | null; ctitle: string | null; key: string; title: string }>(
+    `SELECT c.label, c.title AS ctitle, a.article_key AS key, a.title
+       FROM articles a
        LEFT JOIN law_chapters c ON c.id = a.chapter_id
-      WHERE d.kind = 'law' AND d.is_upcoming = true
-        AND d.id = (SELECT id FROM law_documents WHERE kind = 'law' AND is_upcoming = true
-                     ORDER BY effective_on DESC, id DESC LIMIT 1)
-        AND ($1::bigint IS NULL OR NOT EXISTS (
-              SELECT 1 FROM articles x WHERE x.document_id = $1::bigint AND x.article_key = a.article_key))
+      WHERE a.document_id = (SELECT id FROM law_documents WHERE kind = 'law' AND is_upcoming = true
+                              ORDER BY effective_on DESC, id DESC LIMIT 1)
       ORDER BY a.sort_order`,
-    [currentDocId],
   )
-  return r.rows
+  return r.rows.map((x) => ({ chapterLabel: x.label, chapterTitle: x.ctitle, key: x.key, title: x.title }))
 }
 
 export async function getStudyData(): Promise<StudyData> {
@@ -108,17 +101,7 @@ export async function getStudyData(): Promise<StudyData> {
   const law = await loadChapters("kind = 'law' AND is_upcoming = false")
   const decree = await loadChapters("kind = 'decree' AND is_upcoming = false")
 
-  // 시행예정 문서에만 있는 조문을 같은 장 라벨에 끼워 넣는다.
-  for (const row of await loadUpcomingOnly(law.docId)) {
-    let ch = law.chapters.find((c) => c.label === row.label)
-    if (!ch) {
-      if (row.label === null) continue
-      ch = { label: row.label, title: row.title ?? '', articles: [] }
-      law.chapters.push(ch)
-    }
-    ch.articles.push({ key: row.key, title: row.atitle, isUpcoming: true })
-    ch.articles.sort((x, y) => compareArticleKeys(x.key, y.key))
-  }
+  const lawChapters = mergeUpcomingArticles(law.chapters, await loadUpcomingRows())
 
   return {
     areas,
@@ -129,7 +112,7 @@ export async function getStudyData(): Promise<StudyData> {
       docKind: h.doc_kind, dateLabel: h.date_label, title: h.title, summary: h.summary,
       articleKeys: h.article_keys, isKey: h.is_key,
     })),
-    lawChapters: law.chapters,
+    lawChapters,
     decreeChapters: decree.chapters,
   }
 }

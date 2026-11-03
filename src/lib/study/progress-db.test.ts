@@ -16,8 +16,10 @@ let cardB: string
 
 async function counts(): Promise<string> {
   const r = await query<{ n: string }>(
-    `SELECT ((SELECT count(*) FROM user_unit_reads) + (SELECT count(*) FROM user_card_levels)
-      + (SELECT count(*) FROM user_settings))::text AS n`,
+    `SELECT ((SELECT count(*) FROM user_unit_reads WHERE user_id = $1)
+      + (SELECT count(*) FROM user_card_levels WHERE user_id = $1)
+      + (SELECT count(*) FROM user_settings WHERE user_id = $1))::text AS n`,
+    [user.id],
   )
   return r.rows[0].n
 }
@@ -116,4 +118,28 @@ test('applyProgressChange returns invalid, never throws', async () => {
   for (const c of bad) {
     assert.deepEqual(await applyProgressChange(user, c), { ok: false, reason: 'invalid' }, JSON.stringify(c))
   }
+})
+
+test('malformed inputs are invalid and write nothing', async () => {
+  const before = await counts()
+  const bad = [
+    { type: 'reads', unitId: undefined, reads: 1 },
+    { type: 'reads', unitId: null, reads: 1 },
+    { type: 'reads', unitId: 5, reads: 1 },
+    { type: 'reads', unitId: ['a1-1'], reads: 1 },
+    { type: 'reads', unitId: 'a1-1', reads: '2' },
+    { type: 'reads', unitId: 'a1-1', reads: null },
+    { type: 'level', cardId: undefined, level: 1 },
+    { type: 'level', cardId: 5, level: 1 },
+    { type: 'level', cardId: cardA, level: '2' },
+    { type: 'reset', cardIds: 'abc' },
+    { type: 'reset', cardIds: null },
+    { type: 'reset', cardIds: [5] },
+    { type: 'reset', cardIds: Array.from({ length: 1001 }, () => cardA) },
+    { type: 'bogus' },
+  ] as unknown as ProgressChange[]
+  for (const c of bad) {
+    assert.deepEqual(await applyProgressChange(user, c), { ok: false, reason: 'invalid' }, JSON.stringify(c))
+  }
+  assert.equal(await counts(), before)
 })

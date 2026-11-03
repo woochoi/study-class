@@ -53,11 +53,37 @@ export async function setExamDate(userId: string, date: string | null): Promise<
   )
 }
 
+const MAX_RESET_IDS = 1000
+const UNIT_ID = /^a\d-\d+$/
+const CARD_ID = /^\d{1,18}$/
+
+function isValidChange(c: unknown): c is ProgressChange {
+  if (typeof c !== 'object' || c === null) return false
+  const x = c as Record<string, unknown>
+  switch (x.type) {
+    case 'reads':
+      return typeof x.unitId === 'string' && UNIT_ID.test(x.unitId) && Number.isInteger(x.reads)
+    case 'level':
+      return typeof x.cardId === 'string' && CARD_ID.test(x.cardId) && Number.isInteger(x.level)
+    case 'reset':
+      return (
+        Array.isArray(x.cardIds) &&
+        x.cardIds.length <= MAX_RESET_IDS &&
+        x.cardIds.every((id) => typeof id === 'string' && CARD_ID.test(id))
+      )
+    case 'exam':
+      return x.date === null || typeof x.date === 'string'
+    default:
+      return false
+  }
+}
+
 // FK violation, invalid text representation, numeric out of range
 const INVALID_PG_CODES = new Set(['23503', '22P02', '22003'])
 
 export async function applyProgressChange(user: User | null, change: ProgressChange): Promise<ProgressResult> {
   if (!user) return { ok: false, reason: 'auth' }
+  if (!isValidChange(change)) return { ok: false, reason: 'invalid' }
   try {
     switch (change.type) {
       case 'reads':
