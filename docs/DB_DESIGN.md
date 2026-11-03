@@ -211,7 +211,7 @@ erDiagram
 | `unit_items` | id PK · unit_id → units CASCADE · label text · law_ref text · decree_ref text · is_key boolean DEFAULT false · sort_order int | 세부 항목(법 ↔ 시행령 짝) |
 | `anchors` | article_key text PK · label text · area_id → areas · is_new boolean DEFAULT false | 조문 앵커 |
 | `mnemonics` | id PK · area_id → areas · title text · body text · sort_order int | 기억 묶음 |
-| `cards` | id PK · area_id → areas · deck text CHECK IN ('law','decree','concept') · front text · answer text · extra text · sort_order int · UNIQUE(deck, sort_order) | 암기 카드. 유니크 키로 seed를 `ON CONFLICT` upsert하므로 재seed해도 카드 id가 유지되어 `user_card_levels`가 보존됨 |
+| `cards` | id PK · area_id → areas (NULL 허용) · deck text CHECK IN ('law','decree','concept') · front text · answer text · extra text · sort_order int · UNIQUE(deck, sort_order) | 암기 카드. 유니크 키로 seed를 `ON CONFLICT` upsert하므로 재seed해도 카드 id가 유지되어 `user_card_levels`가 보존됨. area_id가 NULL 허용인 이유: 시행령 조문 카드는 대단원이 없음 |
 | `history_events` | id PK · doc_kind text CHECK IN ('law','decree') · date_label text · title text · summary text · article_keys text[] NOT NULL DEFAULT '{}' · is_key boolean DEFAULT false · sort_order int | 개정 연혁 |
 
 `unit_leaves`는 법령 허브 `AREAS[].subs[].leaves`(마인드맵), `unit_items`는 시행령 허브 `DOMAINS[].units[].items`이다. 두 허브의 중단원은 대단원별 개수·순서가 같으므로 순번으로 매칭한다.

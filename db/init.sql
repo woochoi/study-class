@@ -112,13 +112,14 @@ CREATE TABLE IF NOT EXISTS mnemonics (
 
 CREATE TABLE IF NOT EXISTS cards (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  area_id text NOT NULL REFERENCES areas(id),
+  area_id text REFERENCES areas(id),
   deck text NOT NULL CHECK (deck IN ('law','decree','concept')),
   front text NOT NULL,
   answer text NOT NULL,
   extra text,
   sort_order int NOT NULL
 );
+ALTER TABLE cards ALTER COLUMN area_id DROP NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS cards_deck_sort_order_key ON cards (deck, sort_order);
 
 CREATE TABLE IF NOT EXISTS history_events (
