@@ -9,6 +9,8 @@
 - 시각 컬럼은 `timestamptz NOT NULL DEFAULT now()` (별도 표기가 있는 경우 제외).
 - 조 번호 키는 허브와 같이 `24의2` 형식, 화면에서 "제24조의2"로 표시.
 - 모든 SQL은 `$1, $2` 파라미터화.
+- DB 호스트 포트는 **5433**이다 (5432는 다른 로컬 프로젝트가 사용 중). `DATABASE_URL`/`TEST_DATABASE_URL`도 5433을 사용한다.
+- `db/init.sql`은 멱등(`IF NOT EXISTS`)이라 새 테이블·인덱스는 다시 적용해도 안전하지만, 실제 데이터가 생긴 뒤 기존 컬럼을 바꾸는 변경은 별도의 명시적 ALTER 스크립트가 필요하다.
 
 ## 2. ERD
 
@@ -195,8 +197,8 @@ erDiagram
 | 테이블 | 컬럼 (제약) | 용도 |
 |---|---|---|
 | `law_documents` | id PK · kind text CHECK IN ('law','decree','notice') · title text NOT NULL · promulgation_no text NOT NULL (예 '법률 제21445호', '고시 제2026-9호') · promulgated_on date · effective_on date NOT NULL · is_upcoming boolean NOT NULL DEFAULT false · source text CHECK IN ('api','pdf','seed') · fetched_at timestamptz · UNIQUE(kind, promulgation_no) | 법령 문서 버전. 현행/시행 예정 법률, 시행령, 고시 |
-| `law_chapters` | id PK · document_id → law_documents ON DELETE CASCADE · label text NOT NULL (예 '제4장의2') · title text NOT NULL · sort_order int NOT NULL | 문서별 장 |
-| `articles` | id PK · document_id → law_documents ON DELETE CASCADE · chapter_id → law_chapters ON DELETE SET NULL · article_key text NOT NULL (예 '24의2') · title text NOT NULL · body text (원문, 플랜 2가 채움) · sort_order int NOT NULL · UNIQUE(document_id, article_key) | 조문. 문서 버전에 묶어 저장 |
+| `law_chapters` | id PK · document_id → law_documents ON DELETE CASCADE · label text NOT NULL (예 '제4장의2') · title text NOT NULL · sort_order int NOT NULL · UNIQUE(document_id, label) | 문서별 장. 유니크 키는 seed/동기화가 `ON CONFLICT`로 upsert하기 위한 안정 키 |
+| `articles` | id PK · document_id → law_documents ON DELETE CASCADE · chapter_id → law_chapters ON DELETE SET NULL · article_key text NOT NULL (예 '24의2') · title text NOT NULL · body text (원문, 6단계 동기화 스크립트가 채움) · sort_order int NOT NULL · UNIQUE(document_id, article_key) | 조문. 문서 버전에 묶어 저장 |
 | `article_links` | from_article_id → articles CASCADE · to_article_id → articles CASCADE · note text (예 '①항 4호') · PK(from_article_id, to_article_id) | 법 → 시행령 → 고시 조문 연결 |
 
 ### 3.3 학습 구조 참조 (6단계)
@@ -209,7 +211,7 @@ erDiagram
 | `unit_items` | id PK · unit_id → units CASCADE · label text · law_ref text · decree_ref text · is_key boolean DEFAULT false · sort_order int | 세부 항목(법 ↔ 시행령 짝) |
 | `anchors` | article_key text PK · label text · area_id → areas · is_new boolean DEFAULT false | 조문 앵커 |
 | `mnemonics` | id PK · area_id → areas · title text · body text · sort_order int | 기억 묶음 |
-| `cards` | id PK · area_id → areas · deck text CHECK IN ('law','decree','concept') · front text · answer text · extra text · sort_order int | 암기 카드 |
+| `cards` | id PK · area_id → areas · deck text CHECK IN ('law','decree','concept') · front text · answer text · extra text · sort_order int · UNIQUE(deck, sort_order) | 암기 카드. 유니크 키로 seed를 `ON CONFLICT` upsert하므로 재seed해도 카드 id가 유지되어 `user_card_levels`가 보존됨 |
 | `history_events` | id PK · doc_kind text CHECK IN ('law','decree') · date_label text · title text · summary text · article_keys text[] NOT NULL DEFAULT '{}' · is_key boolean DEFAULT false · sort_order int | 개정 연혁 |
 
 `unit_leaves`는 법령 허브 `AREAS[].subs[].leaves`(마인드맵), `unit_items`는 시행령 허브 `DOMAINS[].units[].items`이다. 두 허브의 중단원은 대단원별 개수·순서가 같으므로 순번으로 매칭한다.

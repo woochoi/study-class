@@ -79,14 +79,14 @@ https://www.law.go.kr/LSW/lsStmdInfoP.do?lsiSeq=213857&ancYnChk=0
 
 - Node.js 20 이상 (개발 환경: Node.js 24)
 - Docker + Docker Compose (Docker Desktop 또는 OrbStack)
-- 5432 포트(PostgreSQL)와 3000 포트(Next.js)가 비어 있어야 합니다.
+- 이 프로젝트의 DB는 호스트 포트 5433(PostgreSQL)을 사용하고 Next.js는 3000 포트를 사용하므로, 두 포트가 비어 있어야 합니다.
 
 
 ## 6. 환경 변수
 
 | 변수 | 예시 | 설명 |
 |---|---|---|
-| `DATABASE_URL` | `postgresql://studycafe:<비밀번호>@localhost:5432/my_study_cafe` | Next.js 서버에서 PostgreSQL에 접속할 때 사용하는 연결 문자열 |
+| `DATABASE_URL` | `postgresql://studycafe:<비밀번호>@localhost:5433/my_study_cafe` | Next.js 서버에서 PostgreSQL에 접속할 때 사용하는 연결 문자열 |
 | `POSTGRES_USER` | `studycafe` | Docker PostgreSQL 컨테이너 초기 사용자 |
 | `POSTGRES_PASSWORD` | (직접 지정) | Docker PostgreSQL 컨테이너 초기 비밀번호 |
 | `POSTGRES_DB` | `my_study_cafe` | Docker PostgreSQL 컨테이너 초기 데이터베이스 이름 |

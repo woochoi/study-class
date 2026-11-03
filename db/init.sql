@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS law_chapters (
   title text NOT NULL,
   sort_order int NOT NULL
 );
+CREATE UNIQUE INDEX IF NOT EXISTS law_chapters_document_label_key ON law_chapters (document_id, label);
 
 CREATE TABLE IF NOT EXISTS articles (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -118,6 +119,7 @@ CREATE TABLE IF NOT EXISTS cards (
   extra text,
   sort_order int NOT NULL
 );
+CREATE UNIQUE INDEX IF NOT EXISTS cards_deck_sort_order_key ON cards (deck, sort_order);
 
 CREATE TABLE IF NOT EXISTS history_events (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

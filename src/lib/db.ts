@@ -11,6 +11,7 @@ function getPool(): pg.Pool {
       throw new Error('DATABASE_URL is not set. Copy .env.example to .env and fill it in.')
     }
     pool = new pg.Pool({ connectionString })
+    pool.on('error', (e) => console.error('pg pool idle client error:', e.message))
   }
   return pool
 }
