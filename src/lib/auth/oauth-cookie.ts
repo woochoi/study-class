@@ -25,6 +25,15 @@ export function decodeOAuthCookie(raw: string | undefined): OAuthCookieValue | n
 }
 
 export function safeReturnTo(raw: string | null | undefined): string {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.startsWith('/\\')) return '/'
-  return raw
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/'
+  // control characters (tab/newline are stripped by the URL parser) and backslashes are never legitimate here
+  if (/[\x00-\x1f\x7f\\]/.test(raw)) return '/'
+  try {
+    const base = 'http://local.invalid'
+    const u = new URL(raw, base)
+    if (u.origin !== base) return '/'
+    return u.pathname + u.search + u.hash
+  } catch {
+    return '/'
+  }
 }

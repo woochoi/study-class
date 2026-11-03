@@ -50,11 +50,15 @@ test('state mismatch fails without calling exchange', async () => {
 })
 
 test('missing oauth cookie fails', async () => {
+  const before = await sessionCount()
+  let called = false
   const r = await handleGoogleCallback({
     code: 'c', state: 'st', oauthCookie: undefined,
-    deps: { exchange: async () => profile, log },
+    deps: { exchange: async () => { called = true; return profile }, log },
   })
   assert.deepEqual(r, { ok: false, redirectTo: '/?login_error=1' })
+  assert.equal(called, false)
+  assert.equal(await sessionCount(), before)
 })
 
 test('exchange throwing (reused code) fails gracefully', async () => {
@@ -68,9 +72,13 @@ test('exchange throwing (reused code) fails gracefully', async () => {
 })
 
 test('missing code fails', async () => {
+  const before = await sessionCount()
+  let called = false
   const r = await handleGoogleCallback({
     code: null, state: 'st', oauthCookie: cookie,
-    deps: { exchange: async () => profile, log },
+    deps: { exchange: async () => { called = true; return profile }, log },
   })
   assert.deepEqual(r, { ok: false, redirectTo: '/?login_error=1' })
+  assert.equal(called, false)
+  assert.equal(await sessionCount(), before)
 })

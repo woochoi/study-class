@@ -16,7 +16,7 @@ test('garbage decodes to null', () => {
 })
 
 test('safeReturnTo blocks external urls', () => {
-  for (const bad of ['https://evil.example', '//evil.example', '/\\evil.example', 'evil', '', null]) {
+  for (const bad of ['https://evil.example', '//evil.example', '/\\evil.example', 'evil', '', null, '/\t/evil.example', '/\n/evil.example', '/\t\\evil.example']) {
     assert.equal(safeReturnTo(bad), '/')
   }
   assert.equal(safeReturnTo('/board?page=2'), '/board?page=2')

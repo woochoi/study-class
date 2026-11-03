@@ -1,16 +1,11 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { handleGoogleCallback } from '@/lib/auth/callback.ts'
 import { OAUTH_COOKIE } from '@/lib/auth/oauth-cookie.ts'
 import { SESSION_COOKIE } from '@/lib/auth/session.ts'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const url = new URL(request.url)
-  const oauthCookie = request.headers
-    .get('cookie')
-    ?.split(';')
-    .map((c) => c.trim())
-    .find((c) => c.startsWith(OAUTH_COOKIE + '='))
-    ?.slice(OAUTH_COOKIE.length + 1)
+  const oauthCookie = request.cookies.get(OAUTH_COOKIE)?.value
 
   const result = await handleGoogleCallback({
     code: url.searchParams.get('code'),

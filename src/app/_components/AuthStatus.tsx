@@ -1,4 +1,5 @@
 import { getCurrentUser } from '@/lib/auth/current-user.ts'
+import ReturnToInput from './ReturnToInput'
 import { signInWithGoogle, signOut } from '@/app/auth/actions.ts'
 
 export default async function AuthStatus() {
@@ -7,7 +8,7 @@ export default async function AuthStatus() {
   if (!user) {
     return (
       <form action={signInWithGoogle}>
-        <input type="hidden" name="returnTo" value="/" />
+        <ReturnToInput />
         <button type="submit" className="rounded border px-3 py-1 text-sm">
           구글로 로그인
         </button>
