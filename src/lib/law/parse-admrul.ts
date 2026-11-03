@@ -2,13 +2,49 @@ import { parseArticleKey } from './article-key.ts'
 import type { ParsedArticle, ParsedChapter, ParsedDocument } from './types.ts'
 import { asList, asRec, isoDate, optStr, parseChapterHeading, shapeError, str } from './shape.ts'
 
+const MOK = ['가', '나', '다', '라', '마', '바', '사', '아', '자', '차', '카', '타', '파', '하']
+const ITEM_RE = /(\d{1,2})\.(?!\d)\s*|([가-하])\.(?=\s)\s*/g
+
+/** 한 줄(항) 안에서 호(1.) / 목(가.) 앞에 줄바꿈과 들여쓰기를 넣는다. */
+function splitItems(line: string): string {
+  const hasEachMok = line.includes('각 목')
+  let n = 0 // 현재 호 번호 (0 = 아직 호 없음)
+  let m = 0 // 현재 줄의 목 진행 수
+  let out = ''
+  let pos = 0
+  for (const match of line.matchAll(ITEM_RE)) {
+    const start = match.index
+    const before = line.slice(0, start)
+    const prev = start > 0 ? line[start - 1] : ''
+    let prefix: string | null = null
+    if (match[1] !== undefined) {
+      const d = Number(match[1])
+      const glued = prev !== '' && !/[\d.\s]/.test(prev)
+      const afterSentence = /다[.:]\s*$/.test(before)
+      if (n === 0 ? d === 1 && afterSentence : d === n + 1 && (glued || afterSentence)) {
+        n = d
+        m = 0
+        prefix = `\n  ${d}. `
+      }
+    } else if ((n > 0 || hasEachMok) && prev !== '' && !/\s/.test(prev) && match[2] === MOK[m]) {
+      m++
+      prefix = `\n    ${match[2]}. `
+    }
+    if (prefix === null) continue
+    out += line.slice(pos, start).trimEnd() + prefix
+    pos = start + match[0].length
+  }
+  return out + line.slice(pos)
+}
+
 /** 고시 조문은 한 줄 문자열이라 ①, 1., 가. 앞에서 줄바꿈을 복원한다. */
 function formatBody(text: string): string {
   return text
     .trim()
     .replace(/\s*([①-⑳])/g, '\n$1')
-    .replace(/(?<=다[.:])\s*(\d{1,2})\.(?!\d)\s*/g, '\n  $1. ')
-    .replace(/(?<=다[.:])\s*([가-하])\.\s/g, '\n    $1. ')
+    .split('\n')
+    .map(splitItems)
+    .join('\n')
 }
 
 function titleOf(text: string): string {

@@ -1,6 +1,6 @@
 import { articleKeyFromParts } from './article-key.ts'
 import type { ParsedLink } from './types.ts'
-import { asList, asRec, shapeError, str } from './shape.ts'
+import { asList, asRec, optStr, shapeError, str } from './shape.ts'
 
 /** 3단비교(`thdCmp`) JSON → 법 조 → 시행령 조 링크 (중복 제거) */
 export function parseThdCmpLinks(json: unknown): ParsedLink[] {
@@ -13,15 +13,15 @@ export function parseThdCmpLinks(json: unknown): ParsedLink[] {
   const links: ParsedLink[] = []
   for (const it of asList(cmp['법률조문'])) {
     const item = asRec(it, '법률조문[]')
-    const dec = item['시행령조문']
-    if (dec == null || dec === '') continue
-    const d = asRec(dec, '시행령조문')
-    const fromKey = articleKeyFromParts(str(item['조번호'], '조번호'), item['조가지번호'] as string | undefined)
-    const toKey = articleKeyFromParts(str(d['조번호'], '시행령조문.조번호'), d['조가지번호'] as string | undefined)
-    const id = `${fromKey}>${toKey}`
-    if (seen.has(id)) continue
-    seen.add(id)
-    links.push({ fromKind: 'law', fromKey, toKind: 'decree', toKey, note: null })
+    const fromKey = articleKeyFromParts(str(item['조번호'], '조번호'), optStr(item['조가지번호']))
+    for (const dec of asList(item['시행령조문'])) {
+      const d = asRec(dec, '시행령조문')
+      const toKey = articleKeyFromParts(str(d['조번호'], '시행령조문.조번호'), optStr(d['조가지번호']))
+      const id = `${fromKey}>${toKey}`
+      if (seen.has(id)) continue
+      seen.add(id)
+      links.push({ fromKind: 'law', fromKey, toKind: 'decree', toKey, note: null })
+    }
   }
   return links
 }

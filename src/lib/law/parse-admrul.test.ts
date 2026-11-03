@@ -39,3 +39,42 @@ test('admrul: dates like 2026.7.1 are not split', () => {
   assert.ok(body.includes('2026.7.1.자'))
   assert.equal(body.includes('\n'), false)
 })
+
+const synth = (text: string) =>
+  parseAdmrulDocument({
+    AdmRulService: {
+      행정규칙기본정보: { 행정규칙명: '테스트', 발령번호: '1', 발령일자: '20260701', 시행일자: '20260701' },
+      조문내용: [text],
+    },
+  }).articles[0].body
+
+test('admrul: 제4조 호 1~18 each on its own indented line', () => {
+  const lines = byKey('4').body.split('\n')
+  const start = lines.findIndex((l) => l.startsWith('①'))
+  const end = lines.findIndex((l) => l.startsWith('②'))
+  const items = lines.slice(start + 1, end)
+  assert.equal(items.length, 18)
+  items.forEach((l, i) => assert.ok(l.startsWith(`  ${i + 1}. `), l))
+})
+
+test('admrul: 제7조 ③ 2호 has 목 가.~나.', () => {
+  const body = byKey('7').body
+  assert.ok(body.includes('\n    가. 법 제33조'))
+  assert.ok(body.includes('\n    나. 암호화 미적용시'))
+})
+
+test('admrul: 제14조 1호 has 목 가.~다.', () => {
+  const lines = byKey('14').body.split('\n')
+  const i = lines.findIndex((l) => l.startsWith('  1. 2개 이상'))
+  assert.ok(i >= 0)
+  const mok = lines.slice(i + 1, i + 4)
+  assert.ok(mok[0].startsWith('    가. 100만명'))
+  assert.ok(mok[1].startsWith('    나. 개인정보처리시스템'))
+  assert.ok(mok[2].startsWith('    다. 정보주체의'))
+})
+
+test('admrul: false-positive guards', () => {
+  assert.equal(synth('제1조(a) 시행한다. 2026.7.1부터 적용한다.').includes('\n'), false)
+  assert.equal(synth('제1조(a) 2026.7.1.자 개정분을 따른다.').includes('\n'), false)
+  assert.equal(synth('제1조(a) 제30조제1항제1호 및 제2호에 따른다.').includes('\n'), false)
+})
