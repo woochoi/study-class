@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --env-file=.env --conditions=react-server --import ./test/use-test-db.ts --test \"src/**/*.test.ts\"",
+    "test": "node --env-file=.env --test-concurrency=1 --conditions=react-server --import ./test/use-test-db.ts --test \"src/**/*.test.ts\"",
     "sync:laws": "node --env-file=.env scripts/sync-laws.ts",
     "seed": "node --env-file=.env scripts/seed.ts",
     "db:apply": "node --env-file=.env scripts/db-apply.ts",

@@ -1,4 +1,5 @@
 import { articleKeyFromParts } from './article-key.ts'
+import type { DocKind } from './types.ts'
 
 export type RefSegment = { text: string; key?: string }
 
@@ -15,4 +16,12 @@ export function splitArticleRefs(text: string): RefSegment[] {
   }
   if (last < text.length) out.push({ text: text.slice(last) })
   return out
+}
+
+/** 조 참조 바로 앞 글자로 어느 법령의 조인지 판단한다. '법 ' → law, '영 '/'시행령 ' → decree, 그 외는 own. */
+export function refKindFor(prefixText: string, own: DocKind): DocKind {
+  const tail = prefixText.slice(-4)
+  if (/(시행령|영)\s*$/.test(tail)) return 'decree'
+  if (/법\s*$/.test(tail)) return 'law'
+  return own
 }
