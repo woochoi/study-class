@@ -93,7 +93,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ kind: 
             ))}
           </ul>
           <p>
-            <Link href={`/questions/new?articleId=${t.entry.id}`}>이 조문에 대해 질문하기</Link>
+            <Link href={`/questions/new?kind=${t.entry.kind}&key=${encodeURIComponent(t.entry.key)}`}>이 조문에 대해 질문하기</Link>
           </p>
           <h3>관련 결정문</h3>
           <p className="hint">준비 중이에요</p>

@@ -9,6 +9,7 @@ const TABS = [
   { href: '/cards', label: '암기 카드' },
   { href: '/laws', label: '조문 매핑표' },
   { href: '/history', label: '개정 연혁' },
+  { href: '/questions', label: '문의 게시판' },
 ]
 
 export default function StudyTabs() {
@@ -16,7 +17,7 @@ export default function StudyTabs() {
   return (
     <nav className="tabs" aria-label="학습 화면">
       {TABS.map((t) => {
-        const active = t.href === '/' ? pathname === '/' : pathname.startsWith(t.href)
+        const active = t.href === '/' ? pathname === '/' : pathname === t.href || pathname.startsWith(t.href + '/')
         return (
           <Link key={t.href} href={t.href} aria-current={active ? 'page' : undefined}>
             {t.label}
