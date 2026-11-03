@@ -18,8 +18,8 @@ test('notice links: 영 30 -> 고시 제2장 (12 articles in order)', () => {
   assert.deepEqual(toKeys('30'), ['3', '4', '5', '6', '6의2', '7', '8', '9', '10', '11', '12', '13'])
 })
 
-test('notice links: 영 30의2 -> 제3장 (14..19)', () => {
-  assert.deepEqual(toKeys('30의2'), ['14', '15', '16', '17', '18', '19'])
+test('notice links: 영 30의2 -> 14..18', () => {
+  assert.deepEqual(toKeys('30의2'), ['14', '15', '16', '17', '18'])
 })
 
 test('notice links: 영 21의2 -> 7', () => {
