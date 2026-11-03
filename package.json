@@ -1,0 +1,32 @@
+{
+  "name": "study-class",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "node --env-file=.env --conditions=react-server --import ./test/use-test-db.ts --test \"src/**/*.test.ts\"",
+    "db:apply": "node --env-file=.env scripts/db-apply.ts",
+    "db:apply:test": "node --env-file=.env --import ./test/use-test-db.ts scripts/db-apply.ts"
+  },
+  "dependencies": {
+    "next": "16.4.4",
+    "pg": "^8.23.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

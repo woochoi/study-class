@@ -5,3 +5,25 @@
 node_modules/
 .next/
 .DS_Store
+
+# create-next-app
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+/coverage
+/out/
+/build
+*.pem
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env*
+!.env.example
+.vercel
+*.tsbuildinfo
+next-env.d.ts
