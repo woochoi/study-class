@@ -15,12 +15,14 @@ export default function ArticleRefText({ text, kind, render }: Props) {
     <>
       {splitArticleRefs(text).map((seg, i, segs) => {
         const inner = render ? render(seg.text) : seg.text
-        return seg.key ? (
-          <Link key={i} href={`/articles/${refKindFor(segs.slice(0, i).map((x) => x.text).join(''), kind)}/${encodeURIComponent(seg.key)}`}>
+        if (!seg.key) return <span key={i}>{inner}</span>
+        const refKind = refKindFor(segs.slice(0, i).map((x) => x.text).join(''), kind)
+        // 다른 법령의 조 참조는 이 사이트에 없으므로 링크하지 않는다.
+        if (refKind === null) return <span key={i}>{inner}</span>
+        return (
+          <Link key={i} href={`/articles/${refKind}/${encodeURIComponent(seg.key)}`}>
             {inner}
           </Link>
-        ) : (
-          <span key={i}>{inner}</span>
         )
       })}
     </>

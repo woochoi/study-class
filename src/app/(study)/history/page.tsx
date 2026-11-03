@@ -1,10 +1,10 @@
+import Link from 'next/link'
 import { connection } from 'next/server'
 import { Suspense } from 'react'
-import ArticleRefText from '../../_components/ArticleRefText.tsx'
+import ArticleRefText from '@/app/_components/ArticleRefText.tsx'
 import { formatArticleKey } from '@/lib/law/article-key.ts'
 import { getStudyData } from '@/lib/study/queries.ts'
 import type { HistoryEvent } from '@/lib/study/types.ts'
-import Link from 'next/link'
 
 function Timeline({ events }: { events: HistoryEvent[] }) {
   return (

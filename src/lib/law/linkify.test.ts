@@ -45,3 +45,18 @@ test('refKindFor: 앞 글자로 법/영 구분', () => {
   assert.equal(refKindFor('', 'decree'), 'decree')
   assert.equal(refKindFor('법', 'notice'), 'law')
 })
+
+test('refKindFor: 다른 법령·정의 약칭·단독 법/영', () => {
+  assert.equal(refKindFor('「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 ', 'notice'), null)
+  assert.equal(refKindFor('「개인정보 보호법」(이하 "법"이라 한다) ', 'notice'), 'law')
+  assert.equal(refKindFor('「개인정보 보호법」 ', 'notice'), 'law')
+  assert.equal(refKindFor('「개인정보 보호법 시행령」(이하 “영”이라 한다) ', 'notice'), 'decree')
+  assert.equal(refKindFor('법 ', 'notice'), 'law')
+  assert.equal(refKindFor('같은 법 시행령(이하 "영"이라 한다) ', 'notice'), 'decree')
+  assert.equal(refKindFor('제29조와 같은 법 ', 'notice'), 'law')
+  assert.equal(refKindFor('영 ', 'notice'), 'decree')
+  assert.equal(refKindFor('정보통신망법 ', 'law'), null)
+  assert.equal(refKindFor('전자정부법 ', 'decree'), null)
+  assert.equal(refKindFor('', 'decree'), 'decree')
+  assert.equal(refKindFor('제1항 및 ', 'decree'), 'decree')
+})

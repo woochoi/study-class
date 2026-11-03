@@ -47,7 +47,7 @@ async function Overview() {
             조문 전체이고, 밑줄 친 번호가 앵커입니다. 밑줄 없는 번호는 앞뒤 앵커에 붙여 외우세요.{' '}
             <b>번호나 앵커를 누르면 조문 전체 제목이 나옵니다</b>(다시 누르면 닫힘, 기울임 번호는 시행예정).
           </p>
-          <ChapterAnchors chapters={data.lawChapters} anchors={data.anchors} />
+          <ChapterAnchors chapters={data.lawChapters} anchors={data.anchors} upcoming={data.upcoming} />
         </div>
 
         <div className="grid2">

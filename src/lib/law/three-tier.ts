@@ -84,7 +84,10 @@ function sortDedupe(rows: ArticleView[]): ArticleView[] {
 
 async function linkedTo(ids: string[], dir: 'down' | 'up', kind: DocKind): Promise<ArticleView[]> {
   if (ids.length === 0) return []
-  const [self, other] = dir === 'down' ? ['from_article_id', 'to_article_id'] : ['to_article_id', 'from_article_id']
+  type LinkCol = 'from_article_id' | 'to_article_id'
+  const [self, other]: [LinkCol, LinkCol] =
+    dir === 'down' ? ['from_article_id', 'to_article_id'] : ['to_article_id', 'from_article_id']
+  // l.${other}, l.${self}는 위 LinkCol 고정 화이트리스트 값이며 입력에서 오지 않는다.
   const res = await query<Row>(
     `${SELECT} JOIN article_links l ON l.${other} = a.id
       WHERE l.${self} = ANY($1::bigint[]) AND d.kind = $2`,

@@ -79,7 +79,7 @@ npm test
 - `/` 개요·진도
 - `/mindmap` 마인드맵
 - `/cards` 암기 카드
-- `/laws` 법령 매핑
+- `/laws` 조문 매핑표
 - `/history` 개정 연혁
 - `/articles/<law|decree|notice>/<조 키>` 조문 3단 보기 (예: `/articles/law/29`, `/articles/law/24의2`)
 

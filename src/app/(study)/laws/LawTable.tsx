@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment, useState } from 'react'
-import ArticleRefText from '../../_components/ArticleRefText.tsx'
+import ArticleRefText from '@/app/_components/ArticleRefText.tsx'
 
 export type LawRow = {
   areaClass: string

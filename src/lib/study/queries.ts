@@ -13,9 +13,19 @@ export type StudyData = {
   history: HistoryEvent[]
   lawChapters: Chapter[]
   decreeChapters: Chapter[]
+  /** 시행 예정 법률(없으면 null). effectiveOn은 YYYY-MM-DD */
+  upcoming?: { effectiveOn: string; promulgationNo: string } | null
 }
 
-async function loadChapters(where: string): Promise<{ docId: string | null; chapters: Chapter[] }> {
+/** loadChapters의 WHERE 조각은 아래 고정 화이트리스트 값만 허용한다(사용자 입력 아님). */
+const CHAPTER_WHERE = {
+  law: "kind = 'law' AND is_upcoming = false",
+  decree: "kind = 'decree' AND is_upcoming = false",
+} as const
+type ChapterWhere = (typeof CHAPTER_WHERE)[keyof typeof CHAPTER_WHERE]
+
+async function loadChapters(where: ChapterWhere): Promise<{ docId: string | null; chapters: Chapter[] }> {
+  // ${where}는 CHAPTER_WHERE의 고정 화이트리스트 값이며 입력에서 오지 않는다.
   const doc = await query<{ id: string }>(
     `SELECT id::text AS id FROM law_documents WHERE ${where} ORDER BY effective_on DESC, id DESC LIMIT 1`,
   )
@@ -41,6 +51,15 @@ async function loadChapters(where: string): Promise<{ docId: string | null; chap
     byChapter.get(a.chapter_id)?.articles.push({ key: a.key, title: a.title, isUpcoming: false })
   }
   return { docId, chapters: out }
+}
+
+async function loadUpcomingInfo(): Promise<{ effectiveOn: string; promulgationNo: string } | null> {
+  const r = await query<{ effective_on: string; promulgation_no: string }>(
+    `SELECT to_char(effective_on, 'YYYY-MM-DD') AS effective_on, promulgation_no
+       FROM law_documents WHERE kind = 'law' AND is_upcoming = true
+      ORDER BY effective_on DESC, id DESC LIMIT 1`,
+  )
+  return r.rows[0] ? { effectiveOn: r.rows[0].effective_on, promulgationNo: r.rows[0].promulgation_no } : null
 }
 
 async function loadUpcomingRows(): Promise<UpcomingRow[]> {
@@ -98,8 +117,8 @@ export async function getStudyData(): Promise<StudyData> {
     units.get(i.unit_id)?.items.push({ label: i.label, lawRef: i.law_ref, decreeRef: i.decree_ref, isKey: i.is_key })
   }
 
-  const law = await loadChapters("kind = 'law' AND is_upcoming = false")
-  const decree = await loadChapters("kind = 'decree' AND is_upcoming = false")
+  const law = await loadChapters(CHAPTER_WHERE.law)
+  const decree = await loadChapters(CHAPTER_WHERE.decree)
 
   const lawChapters = mergeUpcomingArticles(law.chapters, await loadUpcomingRows())
 
@@ -114,6 +133,7 @@ export async function getStudyData(): Promise<StudyData> {
     })),
     lawChapters,
     decreeChapters: decree.chapters,
+    upcoming: await loadUpcomingInfo(),
   }
 }
 

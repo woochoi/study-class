@@ -5,7 +5,19 @@ import { useState } from 'react'
 import { formatArticleKey } from '@/lib/law/article-key.ts'
 import type { Anchor, Chapter } from '@/lib/study/types.ts'
 
-export default function ChapterAnchors({ chapters, anchors }: { chapters: Chapter[]; anchors: Anchor[] }) {
+type Upcoming = { effectiveOn: string; promulgationNo: string } | null | undefined
+
+/** 'YYYY-MM-DD' → 'YYYY. M. D. 시행 예정 (법률 제N호)'. 정보가 없으면 '시행 예정'. */
+function upcomingLabel(u: Upcoming): string {
+  if (!u) return '시행 예정'
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(u.effectiveOn)
+  if (!m) return '시행 예정'
+  return `${m[1]}. ${Number(m[2])}. ${Number(m[3])}. 시행 예정 (${u.promulgationNo})`
+}
+
+export default function ChapterAnchors({
+  chapters, anchors, upcoming,
+}: { chapters: Chapter[]; anchors: Anchor[]; upcoming?: Upcoming }) {
   // 장 label별로 열린 조문 키 하나
   const [open, setOpen] = useState<Record<string, string | null>>({})
 
@@ -71,7 +83,7 @@ export default function ChapterAnchors({ chapters, anchors }: { chapters: Chapte
                     <b>
                       {formatArticleKey(sel.key)}({sel.title})
                     </b>
-                    {sel.isUpcoming && <em>🔜 2027. 3. 9. 시행 예정 (법률 제21910호)</em>}
+                    {sel.isUpcoming && <em>🔜 {upcomingLabel(upcoming)}</em>}
                     <Link href={`/articles/law/${encodeURIComponent(sel.key)}`}>원문 보기</Link>
                   </>
                 )}

@@ -211,7 +211,7 @@ erDiagram
 | `unit_items` | id PK · unit_id → units CASCADE · label text · law_ref text · decree_ref text · is_key boolean DEFAULT false · sort_order int | 세부 항목(법 ↔ 시행령 짝) |
 | `anchors` | article_key text PK · label text · area_id → areas · is_new boolean DEFAULT false | 조문 앵커 |
 | `mnemonics` | id PK · area_id → areas · title text · body text · sort_order int | 기억 묶음 |
-| `cards` | id PK · area_id → areas (NULL 허용) · deck text CHECK IN ('law','decree','concept') · front text · answer text · extra text · sort_order int · UNIQUE(deck, sort_order) | 암기 카드. 유니크 키로 seed를 `ON CONFLICT` upsert하므로 재seed해도 카드 id가 유지되어 `user_card_levels`가 보존됨. area_id가 NULL 허용인 이유: 시행령 조문 카드는 대단원이 없음 |
+| `cards` | id PK · area_id → areas (NULL 허용) · deck text CHECK IN ('law','decree','concept') · front text · answer text · extra text · sort_order int · UNIQUE(deck, sort_order) | 암기 카드. 유니크 키로 seed를 `ON CONFLICT` upsert하므로 재seed해도 카드 id가 유지되어 `user_card_levels`가 보존됨. 카드 id는 deck 안 순서(sort_order)가 바뀌지 않는 한 유지된다 — 허브에서 카드를 중간에 끼워 넣으면 이후 카드의 진도가 다른 카드로 옮겨 간다. area_id가 NULL 허용인 이유: 시행령 조문 카드는 대단원이 없음 |
 | `history_events` | id PK · doc_kind text CHECK IN ('law','decree') · date_label text · title text · summary text · article_keys text[] NOT NULL DEFAULT '{}' · is_key boolean DEFAULT false · sort_order int | 개정 연혁 |
 
 `unit_leaves`는 법령 허브 `AREAS[].subs[].leaves`(마인드맵), `unit_items`는 시행령 허브 `DOMAINS[].units[].items`이다. 두 허브의 중단원은 대단원별 개수·순서가 같으므로 순번으로 매칭한다.
@@ -233,7 +233,7 @@ erDiagram
 
 ## 4. seed 출처
 
-데이터는 두 경로로 적재한다. 법령 원문은 `npm run sync:laws`(API), 학습 구조는 `npm run seed`(JSON)이며 둘 다 `ON CONFLICT` upsert라 재실행해도 조문·카드 id가 유지된다.
+데이터는 두 경로로 적재한다. 카드 id는 deck 안 순서(sort_order)가 바뀌지 않는 한 유지된다 — 허브에서 카드를 중간에 끼워 넣으면 이후 카드의 진도가 다른 카드로 옮겨 간다. 법령 원문은 `npm run sync:laws`(API), 학습 구조는 `npm run seed`(JSON)이며 둘 다 `ON CONFLICT` upsert라 재실행해도 조문·카드 id가 유지된다.
 
 | 테이블 | 출처 |
 |---|---|
@@ -241,8 +241,8 @@ erDiagram
 | `law_chapters`, `articles` (제목·장·`body`) | `npm run sync:laws`가 API 응답으로 채움 (`source='api'`) |
 | `article_links` (법 ↔ 시행령) | `npm run sync:laws`가 API 3단비교에서 채움 |
 | `article_links` (시행령 ↔ 고시) | `db/seed/notice-links.json` (허브 매핑, 예: `영30① · 고시 제7조`)을 sync가 반영 |
-| `areas`, `units`, `unit_leaves`, `anchors`, `mnemonics`, 법 카드·`history_events` (law) | `db/seed/hub-law.json` (`CPPG 법령 허브.html`에서 `scripts/extract-hub-data.ts`로 추출) |
-| `unit_items`, 시행령 카드·`history_events` (decree) | `db/seed/hub-decree.json` (`CPPG 시행령 허브.html`에서 동일 스크립트로 추출) |
+| `areas`, `units`, `unit_leaves`, `anchors`, `mnemonics`, 법 카드·개념 카드(법령 허브의 concept cards)·`history_events` (law) | `db/seed/hub-law.json` (`CPPG 법령 허브.html`에서 `scripts/extract-hub-data.ts`로 추출) |
+| `unit_items`, 시행령 카드·개념 카드(DOMAINS 상세 항목)·`history_events` (decree) | `db/seed/hub-decree.json` (`CPPG 시행령 허브.html`에서 동일 스크립트로 추출) |
 | 테스트용 법령 | `test/fixtures/law-api/*` (`law.json`, `law-upcoming.json`, `decree.json`, `admrul.json`, `thdcmp.json`) — API 응답 fixture |
 | `users`, `sessions`, `user_*`, `questions`, `answers` | seed 없음 (런타임 생성) |
 

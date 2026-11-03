@@ -16,9 +16,11 @@ const client = new pg.Client({ connectionString: url })
 await client.connect()
 try {
   await saveSeedData(client, data)
-  for (const t of [
+  const COUNT_TABLES = [
     'areas', 'units', 'unit_leaves', 'unit_items', 'anchors', 'mnemonics', 'cards', 'history_events',
-  ]) {
+  ] as const
+  for (const t of COUNT_TABLES) {
+    // ${t}는 위 COUNT_TABLES 고정 화이트리스트 값이며 입력에서 오지 않는다.
     const r = await client.query(`SELECT count(*) AS n FROM ${t}`)
     console.log(`${t}: ${r.rows[0].n}`)
   }
