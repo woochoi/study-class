@@ -96,6 +96,27 @@ npm test
 
 다른 사람의 답변 흐름은 다른 구글 계정으로 로그인해 직접 확인해야 합니다(수동). 자동 테스트(`npm test`)는 두 번째 테스트 사용자로 같은 흐름을 검증합니다.
 
+## 데이터 유지 확인
+
+데이터는 Docker named volume(`study-class_pgdata`)에 저장되므로 새로고침, `npm run dev` 재시작, 컨테이너를 지웠다 다시 만들어도 남습니다. 확인 순서:
+
+1. 로그인해서 회독 체크·암기 카드 단계·시험일을 바꾸고 질문을 하나 올립니다.
+2. 브라우저를 새로고침합니다.
+3. `npm run dev`를 끄고 다시 실행합니다.
+4. 컨테이너를 지우고 다시 만듭니다. `-v`를 붙이면 볼륨까지 지워지므로 붙이지 않습니다.
+
+```bash
+docker compose down
+```
+
+```bash
+docker compose up -d --wait
+```
+
+5. 다시 접속해 로그인 상태, 진도, 시험일, 질문이 그대로인지 확인합니다.
+
+2026-11-03에 이 순서로 확인했습니다(사용자·세션·조문 420개·카드 242개·진도·질문 수가 재생성 전후 같음).
+
 ## Google OAuth 설정
 
 1. Google Cloud Console에서 OAuth 클라이언트 ID(웹 애플리케이션)를 만듭니다.
@@ -109,3 +130,5 @@ npm test
 - [DB 설계](docs/DB_DESIGN.md)
 - [MVP 설계 스펙](docs/superpowers/specs/2026-11-03-study-cafe-mvp-design.md)
 - [플랜 1 구현 계획](docs/superpowers/plans/2026-11-03-plan1-foundation-google-login.md)
+- [플랜 2 구현 계획](docs/superpowers/plans/2026-11-03-plan2-dashboard-three-tier.md)
+- [플랜 3 구현 계획](docs/superpowers/plans/2026-11-03-plan3-question-board.md)
