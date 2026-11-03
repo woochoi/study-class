@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useSyncExternalStore } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import { ddayLabel } from '@/lib/study/progress.ts'
 import { saveExamDate } from '../actions.ts'
 
@@ -21,16 +21,22 @@ export default function ExamDate({ initial }: { initial: string | null }) {
   const day = useSyncExternalStore(noop, localDay, () => null)
   const [msg, setMsg] = useState<string | null>(null)
 
+  const seqRef = useRef(0)
+  const confirmedRef = useRef<string | null>(initial)
+
   async function onChange(value: string) {
-    const prev = date
     const next = value === '' ? null : value
+    const mySeq = ++seqRef.current
     setDate(next)
     setMsg(null)
     const r = await saveExamDate(next)
-    if (!r.ok) {
-      setDate(prev)
-      setMsg(r.reason === 'auth' ? '로그인하면 진도가 저장돼요' : '저장하지 못했어요. 다시 시도해 주세요.')
+    if (r.ok) {
+      confirmedRef.current = next
+      return
     }
+    if (seqRef.current !== mySeq) return
+    setDate(confirmedRef.current)
+    setMsg(r.reason === 'auth' ? '로그인하면 진도가 저장돼요' : '저장하지 못했어요. 다시 시도해 주세요.')
   }
 
   return (

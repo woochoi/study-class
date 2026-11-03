@@ -1,3 +1,4 @@
+import { connection } from 'next/server'
 import { Suspense } from 'react'
 import { getCurrentProgress } from '@/lib/study/current-progress.ts'
 import { getStudyData } from '@/lib/study/queries.ts'
@@ -18,6 +19,8 @@ async function LoginError({ searchParams }: { searchParams: PageProps<'/'>['sear
 }
 
 async function Overview() {
+  // DB 읽기는 요청 시점에 실행 (정적 셸에 굳지 않게)
+  await connection()
   const [data, { progress }] = await Promise.all([getStudyData(), getCurrentProgress()])
   const knownCards = data.cards.filter((c) => (progress.levels[c.id] ?? 1) >= 3).length
   const areaOf = new Map(data.areas.map((a) => [a.id, a]))
