@@ -1,0 +1,540 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CPPG 학습 허브</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 법령집 같은 단정한 한 장 — 요약 → 마인드맵 → 카드 → 조문 색인 순서로 내려가는 단일 컬럼 */
+:root{
+  --paper:#F2F4F6; --sheet:#FFFFFF; --ink:#18232F; --muted:#5B6773; --rule:#D6DCE2;
+  --accent:#2C5A86; --stamp:#B2432C; --soft:#E6ECF2;
+  --d1:#2E7D8C; --d2:#3F63B5; --d3:#7A52A8; --d4:#B26A1E; --d5:#3E8A4F;
+  --good:#2F7D4A; --warn:#B7791F; --bad:#B2432C;
+  --f-display:"Gowun Batang","Nanum Myeongjo",serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11171D; --sheet:#18212A; --ink:#E4E9EE; --muted:#97A3AF; --rule:#2B3743;
+  --accent:#7FAEDB; --stamp:#E3826B; --soft:#1F2A35;
+  --d1:#4FB3C4; --d2:#7C9BE6; --d3:#AE8BD9; --d4:#E0A055; --d5:#6CC283;
+  --good:#6CC283; --warn:#E0A055; --bad:#E3826B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11171D; --sheet:#18212A; --ink:#E4E9EE; --muted:#97A3AF; --rule:#2B3743;
+  --accent:#7FAEDB; --stamp:#E3826B; --soft:#1F2A35;
+  --d1:#4FB3C4; --d2:#7C9BE6; --d3:#AE8BD9; --d4:#E0A055; --d5:#6CC283;
+  --good:#6CC283; --warn:#E0A055; --bad:#E3826B; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;font-weight:700}
+h1{font-size:30px;letter-spacing:-.01em}
+h2{font-size:22px}
+h3{font-size:17px}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;font-weight:600}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer}
+button:focus-visible,summary:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);
+  display:flex;gap:4px 18px;flex-wrap:wrap;align-items:center;padding:10px 0}
+nav.top b{font-family:var(--f-display);font-size:16px;margin-right:auto}
+nav.top a{color:var(--muted);text-decoration:none;font-size:14px}
+nav.top a:hover{color:var(--accent)}
+
+header.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:end;padding-top:12px}
+header.hero p{color:var(--muted);margin:8px 0 0;max-width:60ch}
+.readiness{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:18px 20px;display:flex;gap:18px;align-items:center}
+.readiness .big{font-family:var(--f-display);font-size:46px;line-height:1;color:var(--accent)}
+.readiness small{display:block;color:var(--muted);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:12px 14px}
+.stat .v{font-family:var(--f-mono);font-size:24px}
+.stat .l{font-size:13px;color:var(--muted)}
+.stat.due .v{color:var(--stamp)}
+
+section.block{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:22px clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:16px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.sec-head p{margin:4px 0 0;color:var(--muted);font-size:14px}
+
+/* 배점 지도 */
+.weightmap{display:flex;flex-direction:column;gap:10px}
+.wrow{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 64px;gap:12px;align-items:center}
+.wrow .nm{font-size:14px;font-weight:500}
+.wrow .nm span{color:var(--muted);font-weight:400}
+.bar{position:relative;height:22px;background:var(--soft);border-radius:4px;overflow:hidden}
+.bar .w{position:absolute;inset:0 auto 0 0;opacity:.22}
+.bar .m{position:absolute;inset:0 auto 0 0}
+.wrow .pc{font-family:var(--f-mono);font-size:13px;text-align:right;color:var(--muted)}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;background:var(--accent)}
+
+/* 마인드맵 */
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+.panel .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px 24px}
+.mapbox{overflow-x:auto;border:1px solid var(--rule);border-radius:10px;background:var(--paper)}
+.mapbox svg{display:block;min-width:620px;width:100%;height:auto}
+.mapbox text{font-family:var(--f-body);fill:var(--ink)}
+.node{cursor:pointer}
+.node:focus{outline:none}
+.node:focus-visible circle,.node:hover circle{stroke:var(--ink);stroke-width:2}
+.node.sel circle{stroke:var(--stamp);stroke-width:3}
+.panel{border-top:3px solid var(--accent);padding-top:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel .crumb{font-size:12px;color:var(--muted)}
+.items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.items li{display:flex;flex-direction:column;gap:4px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.items .t{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
+.items .t b{font-weight:600;font-size:14.5px}
+.refs{display:flex;flex-direction:column;gap:2px;font-size:13px}
+.refs span{color:var(--muted)}
+.refs em{font-style:normal;font-family:var(--f-mono);font-size:12px;color:var(--accent);margin-right:6px}
+.star{color:var(--stamp);font-size:12px;font-weight:600;letter-spacing:.04em}
+.lvl{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;white-space:nowrap;border:1px solid currentColor}
+.lv0{color:var(--muted)} .lv1{color:var(--warn)} .lv2{color:var(--accent)} .lv3{color:var(--good)}
+.btn{border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:6px;padding:7px 14px;font-size:14px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--sheet);border-color:var(--accent)}
+
+/* 카드 */
+.deckbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select{font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--sheet);color:var(--ink);max-width:100%}
+.cardwrap{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;max-width:720px;width:100%;margin:0 auto}
+.card{min-height:220px;border:1px solid var(--rule);border-radius:12px;background:var(--paper);padding:26px 24px;display:flex;flex-direction:column;gap:12px;justify-content:center;cursor:pointer;text-align:left;color:var(--ink)}
+.card .tag{font-size:12px;color:var(--muted)}
+.card .q{font-family:var(--f-display);font-size:22px;line-height:1.45}
+.card .a{border-top:1px dashed var(--rule);padding-top:12px;font-size:15px;white-space:pre-line}
+.card .hint{font-size:12px;color:var(--muted)}
+.grade{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.grade button{padding:10px;border-radius:8px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink)}
+.grade button[data-g="0"]{border-color:var(--bad)} .grade button[data-g="1"]{border-color:var(--warn)} .grade button[data-g="2"]{border-color:var(--good)}
+.grade button:disabled{opacity:.4;cursor:default}
+.counter{font-size:13px;color:var(--muted);text-align:center}
+
+/* 조문 색인 */
+.chapters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+details{border:1px solid var(--rule);border-radius:8px;padding:10px 14px;background:var(--paper)}
+summary{cursor:pointer;font-weight:600;font-size:14.5px;display:flex;justify-content:space-between;gap:8px}
+summary span{color:var(--muted);font-weight:400;font-size:13px}
+details ul{margin:8px 0 2px;padding-left:0;list-style:none;font-size:13.5px;display:flex;flex-direction:column;gap:3px}
+details li em{font-style:normal;font-family:var(--f-mono);font-size:12px;color:var(--accent);display:inline-block;min-width:78px}
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;border-left:2px solid var(--rule);margin-left:6px}
+.timeline li{position:relative;padding:4px 0 14px 18px;font-size:14px}
+.timeline li::before{content:"";position:absolute;left:-7px;top:10px;width:12px;height:12px;border-radius:50%;background:var(--sheet);border:2px solid var(--accent)}
+.timeline li.key::before{background:var(--stamp);border-color:var(--stamp)}
+.timeline .dt{font-family:var(--f-mono);font-size:13px;color:var(--muted)}
+.tips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.tip{border-top:2px solid var(--accent);padding-top:10px;font-size:14px}
+.tip b{display:block;margin-bottom:2px}
+.syncnote{font-size:12px;color:var(--muted)}
+
+@media (max-width:820px){
+  header.hero,.mapgrid{grid-template-columns:minmax(0,1fr)}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .chapters,.tips{grid-template-columns:minmax(0,1fr)}
+  .wrow{grid-template-columns:minmax(0,1fr) 56px}
+  .wrow .bar{grid-column:1/-1;grid-row:2}
+  .panel .items{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){.bar .m{transition:width .5s ease}}
+</style>
+
+<div class="wrap">
+<nav class="top" aria-label="섹션">
+  <b>CPPG 학습 허브</b>
+  <a href="#dash">요약</a><a href="#map">마인드맵</a><a href="#cards">암기 카드</a><a href="#decree">시행령 색인</a>
+</nav>
+
+<header class="hero" id="dash">
+  <div>
+    <div class="eyebrow">개인정보관리사 · 출제영역 ↔ 법률 ↔ 시행령</div>
+    <h1>배점 순서대로, 조문 번호까지</h1>
+    <p>출제영역 5개 대단원을 개인정보 보호법·시행령 조문과 연결했습니다. 마인드맵에서 단원을 고르고, 암기 카드로 간격 반복 복습을 하세요. 진도는 기록되어 다음에 이어집니다.</p>
+  </div>
+  <div class="readiness">
+    <div class="big mono" id="readyPct">0%</div>
+    <div><b>배점 가중 준비도</b><small>각 영역 숙련도 × 시험 배점 비율의 합. "앎"을 3회 이상 누적한 항목이 숙련으로 계산됩니다.</small></div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat due"><div class="v" id="sDue">0</div><div class="l">오늘 복습할 카드</div></div>
+  <div class="stat"><div class="v" id="sNew">0</div><div class="l">아직 안 본 항목</div></div>
+  <div class="stat"><div class="v" id="sMaster">0</div><div class="l">숙련 항목</div></div>
+  <div class="stat"><div class="v" id="sTotal">0</div><div class="l">전체 출제 세부 항목</div></div>
+</div>
+
+<section class="block">
+  <div class="sec-head">
+    <div><h2>배점 지도</h2><p>막대 길이 = 시험 배점, 진한 부분 = 내 숙련도. 긴 막대의 빈 칸부터 채우는 것이 점수에 가장 유리합니다.</p></div>
+    <div class="legend"><span><i style="opacity:.22"></i>배점</span><span><i></i>숙련</span></div>
+  </div>
+  <div class="weightmap" id="weightmap"></div>
+</section>
+
+<section class="block" id="map">
+  <div class="sec-head">
+    <div><h2>출제영역 마인드맵</h2><p>중심에서 대단원 → 중단원으로 뻗습니다. 점의 진하기가 숙련도입니다. 중단원을 누르면 아래에 법·시행령 조문이 나옵니다.</p></div>
+  </div>
+  <div class="mapgrid">
+    <div class="mapbox"><svg id="mind" viewBox="0 0 1100 680" role="img" aria-label="CPPG 출제영역 마인드맵"></svg></div>
+    <div class="panel" id="panel"></div>
+  </div>
+</section>
+
+<section class="block" id="cards">
+  <div class="sec-head">
+    <div><h2>암기 카드</h2><p>카드를 눌러 답을 확인하고 스스로 채점하세요. "앎"은 복습 간격을 1→3→7→14→30일로 늘리고, "모름"은 내일 다시 보여줍니다.</p></div>
+    <div class="deckbar">
+      <label for="deckSel" class="syncnote">덱</label>
+      <select id="deckSel"></select>
+    </div>
+  </div>
+  <div class="cardwrap">
+    <button class="card" id="card" type="button" aria-live="polite"></button>
+    <div class="grade">
+      <button type="button" data-g="0" id="g0">모름</button>
+      <button type="button" data-g="1" id="g1">애매함</button>
+      <button type="button" data-g="2" id="g2">앎</button>
+    </div>
+    <div class="counter" id="counter"></div>
+  </div>
+</section>
+
+<section class="block" id="decree">
+  <div class="sec-head">
+    <div><h2>시행령 조문 색인</h2><p>현행 시행령(대통령령 제36671호, 2026. 9. 10.) 본문 장별 조 제목. 삭제 조문은 뺐습니다.</p></div>
+  </div>
+  <div class="chapters" id="chapters"></div>
+  <h3>꼭 볼 부칙</h3>
+  <ul class="timeline" id="timeline"></ul>
+</section>
+
+<section class="block">
+  <h2>기억에 남기는 공부 순서</h2>
+  <div class="tips">
+    <div class="tip"><b>1. 큰 틀 먼저</b>마인드맵 5개 가지와 배점을 외우고, 각 가지에 붙는 법률 장을 말로 설명해 봅니다.</div>
+    <div class="tip"><b>2. 법 → 시행령 짝 짓기</b>법 조문이 "대통령령으로 정한다"고 넘긴 부분이 시행령입니다. 카드 답의 두 줄을 늘 같이 읽으세요.</div>
+    <div class="tip"><b>3. 보호조치부터</b>30%인 보호조치와 25%인 라이프사이클이 절반을 넘습니다. 별표(★) 항목을 먼저 숙련으로 만드세요.</div>
+  </div>
+  <div class="syncnote" id="syncnote">진도는 이 브라우저에 저장됩니다.</div>
+</section>
+</div>
+
+<script>
+// ---------- 데이터 ----------
+const DOMAINS=[
+ {id:"d1",name:"개인정보보호의 이해",w:10,units:[
+  {n:"개인정보의 개요",items:[
+   ["개인정보의 정의","법 제2조 정의(1호 가·나·다목, 가명처리, 처리, 정보주체, 개인정보처리자)","령 제2조 공공기관의 범위, 제3조 영상정보처리기기의 범위",1],
+   ["프라이버시와 개인정보","법 제1조 목적(사생활의 비밀 보호) · 이론","ⓘ 시행령 조문 없음"],
+   ["개인정보의 유형 및 종류","법 제23조 민감정보, 제24조 고유식별정보, 제24조의2 주민등록번호","령 제18조 민감정보의 범위, 제19조 고유식별정보의 범위",1],
+   ["개인정보의 특성 · 가치 산정","ⓘ 이론","ⓘ 시행령 조문 없음"],
+   ["해외 개인정보보호 제도","GDPR·OECD·APEC CBPR / 법 제14조 국제협력, 제28조의8~11 국외 이전","령 제29조의7~12 국외 이전 (제29조의9 보호 수준 인정)"]]},
+  {n:"개인정보보호의 중요성",items:[
+   ["정보사회와 사생활 노출","법 제1조 목적 · 이론","ⓘ 시행령 조문 없음"],
+   ["개인정보 침해 유형","법 제59조 금지행위, 제34조 유출 통지·신고, 제34조의2 노출 삭제·차단","령 제39조~제40조 유출 통지·신고, 제40조의2, 제59조 침해 사실의 신고"],
+   ["개인정보보호의 필요성","법 제1조 목적, 제5조 국가 등의 책무","ⓘ 시행령 조문 없음"]]},
+  {n:"기업의 사회적 책임",items:[
+   ["개인정보의 중요성 인식","법 제3조 보호 원칙, 제13조 자율규제, 제13조의2 보호의 날","령 제14조 자율규제의 촉진 및 지원"],
+   ["조직 구성·운영 · 역할","법 제31조 보호책임자, 제31조의2 국내대리인, 제30조의3 사업주 책임, 제28조 취급자 감독","령 제32조 보호책임자 지정, 제32조의2 협의회, 제32조의3 국내대리인",1]]}]},
+ {id:"d2",name:"개인정보보호 제도",w:20,units:[
+  {n:"개인정보보호 관련 법률 체계",items:[
+   ["관련 법 개요","법 제1장 총칙, 제6조 다른 법률과의 관계(일반법·특별법)","령 제1조 목적 (법 → 시행령 → 고시 위임)"],
+   ["우리나라 주요 법체계","법 제7조~제7조의14 보호위원회, 제9조 기본계획, 제10조 시행계획, 제12조 보호지침","령 제4조의2~제9조의3 보호위원회, 제11조·제12조 계획, 제13조 자료제출"]]},
+  {n:"개인정보보호 원칙과 의무",items:[
+   ["OECD 8원칙","법 제3조 개인정보 보호 원칙 (①~⑧항)","ⓘ 원칙은 법률에만 있음",1],
+   ["필요 최소한의 수집","법 제3조①, 제16조 수집 제한","ⓘ (최소정보 구분 동의는 령 제17조)"],
+   ["목적 외 활용 금지","법 제3조②, 제18조 목적 외 이용·제공 제한, 제19조","령 제14조의2 추가적 이용·제공 기준, 제15조 목적 외 이용·제공 관리",1],
+   ["정확성·완전성·최신성","법 제3조③","ⓘ 시행령 조문 없음"],
+   ["안전조치 의무","법 제3조④, 제29조 안전조치의무","령 제30조 안전성 확보 조치, 제30조의2 공공시스템",1],
+   ["처리방침 수립 및 공개","법 제30조, 제30조의2 평가·개선권고","령 제31조 처리방침 내용·공개방법, 제31조의2 평가"],
+   ["사생활 침해의 최소화","법 제3조⑥","ⓘ 시행령 조문 없음"],
+   ["익명 처리 원칙","법 제3조⑦, 제28조의2~7 가명정보 특례","령 제29조의2~5 결합전문기관·가명정보 안전조치"],
+   ["법령 준수 의무","법 제3조⑧","ⓘ 시행령 조문 없음"],
+   ["개인정보의 처리 제한","법 제23조~제28조 (민감·고유식별·주민번호·영상·위탁·영업양도)","령 제18·19·21·21의2조, 제22~27조의3, 제28조, 제29조"],
+   ["보호책임자의 지정","법 제31조, 제31조의2 국내대리인","령 제32조, 제32조의2, 제32조의3",1],
+   ["개인정보파일 등록 및 공개","법 제32조 (공공기관)","령 제33조 등록사항, 제34조 등록 및 공개"]]},
+  {n:"정보주체의 권리",items:[
+   ["정보를 제공받을 권리","법 제4조1호, 제20조 수집 출처 통지, 제20조의2 이용·제공 내역 통지","령 제15조의2, 제15조의3, 제31조"],
+   ["처리에 관한 동의권","법 제4조2호, 제22조 동의를 받는 방법","령 제17조 동의를 받는 방법",1],
+   ["개인정보 열람권","법 제35조 열람, 제35조의2~4 전송 요구","령 제41조 열람절차, 제42조 제한·거절, 제42조의2~16 전송요구, 제48조"],
+   ["처리정지·정정·삭제권","법 제36조 정정·삭제, 제37조 처리정지, 제37조의2 자동화된 결정","령 제43조, 제44조, 제44조의2~4",1],
+   ["법정대리인의 권리","법 제22조의2 아동(14세 미만), 제38조 권리행사 방법","령 제17조의2 아동, 제45조 대리인 범위, 제46조 확인, 제47조 수수료"],
+   ["피해를 구제받을 권리","법 제39조 손해배상, 제39조의2 법정손해배상, 제39조의3~7","령 제48조의7 손해배상 보험 등 가입 대상"]]},
+  {n:"분쟁해결절차",items:[
+   ["개인정보 분쟁 조정","법 제7장 제40조~제50조의2 (제49조 집단분쟁조정)","령 제7장 제48조의14~제57조 (제52~55조 집단분쟁조정)",1],
+   ["단체소송","법 제8장 제51조~제57조 (제51조 대상, 제54~55조 소송허가)","ⓘ 시행령 없음 · 단체소송규칙"]]}]},
+ {id:"d3",name:"개인정보 라이프사이클 관리",w:25,units:[
+  {n:"개인정보 수집, 이용",items:[
+   ["개인정보 오너십의 이해","법 제4조 정보주체의 권리 · 이론","ⓘ 시행령 조문 없음"],
+   ["수집·이용 원칙","법 제15조 수집·이용, 제16조 수집 제한","령 제14조의2 추가적 이용 판단기준",1],
+   ["수집·이용 시 유의사항","법 제20조, 제22조, 제22조의2, 제23조, 제24조, 제24조의2, 제25조, 제25조의2","령 제15조의2, 제17조, 제17조의2, 제18조, 제19조, 제22~27조의3"]]},
+  {n:"개인정보 저장, 관리",items:[
+   ["저장·관리의 이해","법 제29조 안전조치의무, 제28조 취급자 감독","령 제30조, 제21조 고유식별정보 안전성 확보"],
+   ["파기의 원칙","법 제21조 개인정보의 파기 (보존 시 분리 저장)","령 제16조 개인정보의 파기방법",1],
+   ["처리 시 유의사항","법 제28조의2~7 가명정보, 제28조의12~15 AI 특례, 제34조 유출","령 제29조의2~5, 제39조~제40조"]]},
+  {n:"개인정보 제공",items:[
+   ["개인정보 제공의 이해","법 제17조 개인정보의 제공","령 제14조의2, 제15조"],
+   ["제3자 제공·위탁 원칙","법 제17조 제3자 제공, 제26조 업무위탁, 제27조 영업양도","령 제28조 위탁 시 조치, 제26조, 제29조 영업양도 통지",1],
+   ["제3자 제공과 위탁의 구분","법 제17조 vs 제26조 (누구의 이익·업무인가)","ⓘ 시행령은 제28조로 위탁 측만 구체화"],
+   ["제공 시 유의사항","법 제18조, 제19조, 제20조의2, 제28조의8~11 국외 이전","령 제15조의3, 제29조, 제29조의7~12"]]}]},
+ {id:"d4",name:"개인정보의 보호조치",w:30,units:[
+  {n:"개요",items:[
+   ["제·개정의 배경","법 제29조 → 시행령 → 고시 (2023 정보통신서비스 기준 통합)","령 제30조, 제30조의2 공공시스템(2023 신설)"],
+   ["기준의 법적 성격","법 제29조 위임 최소 기준, 위반 시 제64조의2 과징금·제75조 과태료","령 제30조 세부 기준을 보호위원회 고시로 위임"]]},
+  {n:"개인정보의 기술적·관리적 보호조치 기준",items:[
+   ["내부관리계획 수립·시행","법 제29조","령 제30조① · 고시 제4조 내부 관리계획",1],
+   ["접근통제","법 제29조","령 제30조① · 고시 제5조 접근권한, 제6조 접근통제",1],
+   ["접속기록의 위·변조 방지","법 제29조","령 제30조① · 고시 제8조 접속기록 보관·점검",1],
+   ["고유식별정보","법 제24조③, 제24조의2② (주민번호 암호화)","령 제21조 안전성 확보, 제21조의2 주민번호 암호화 대상",1],
+   ["개인정보의 암호화","법 제29조","령 제30조① · 고시 제7조 암호화",1],
+   ["악성 프로그램 방지","법 제29조","령 제30조① · 고시 제9조"],
+   ["출력·복사 시 보호조치","법 제29조","ⓘ 시행령 없음 · 고시 제12조"],
+   ["개인정보 표시 제한","법 제29조","ⓘ 시행령 없음 · 고시(마스킹)"],
+   ["출입통제","법 제29조","령 제30조① 물리적 조치 · 고시 제10조"],
+   ["CCTV 영상/운영","법 제25조 고정형, 제25조의2 이동형","령 제22조 예외, 제23조 의견수렴, 제24조 안내판, 제25조 운영방침, 제26~27조의3",1]]}]},
+ {id:"d5",name:"개인정보 관리체계",w:15,units:[
+  {n:"개인정보 관리체계 개요",items:[
+   ["관리체계의 개념","법 제32조의2 보호 인증, 제30조의3 사업주 책임","령 제34조의2 인증 기준"],
+   ["국내외 관리체계 유형·현황","ISMS-P, ISO/IEC 27001·27701, APEC CBPR","령 제34조의2"]]},
+  {n:"주요 개인정보 관리체계",items:[
+   ["개인정보 영향평가","법 제33조 (공공기관 의무)","령 제35조 대상, 제36조 평가기관, 제37조 고려사항, 제38조 평가기준",1],
+   ["개인정보보호 수준 진단","법 제11조의2 보호수준 평가, 제8조의2 침해요인 평가","령 제13조의2, 제9조의3"],
+   ["개인정보보호관리체계(ISMS-P)","법 제32조의2 개인정보 보호 인증","령 제34조의2~제34조의8 (기준·수수료·취소·사후관리·전문기관·표시·심사원)",1]]}]}
+];
+const DECREE=[
+ ["제1장 총칙","1|목적;2|공공기관의 범위;3|영상정보처리기기의 범위"],
+ ["제2장 개인정보 보호위원회","4의2|영리업무의 금지;5|전문위원회;5의2|개인정보 보호 정책협의회;5의3|시ㆍ도 개인정보 보호 관계 기관 협의회;6|의사의 공개;7|공무원 등의 파견;9|출석수당 등;9의2|정책ㆍ제도ㆍ법령 개선 권고의 절차 등;9의3|개인정보 침해요인 평가 절차 등"],
+ ["제3장 기본계획 및 시행계획의 수립절차","11|기본계획의 수립절차 등;12|시행계획의 수립절차 등;13|자료제출 요구 등의 범위와 방법;13의2|개인정보 보호수준 평가의 대상ㆍ기준ㆍ방법ㆍ절차 등;14|자율규제의 촉진 및 지원"],
+ ["제4장 개인정보의 처리","14의2|개인정보의 추가적인 이용ㆍ제공의 기준 등;15|개인정보의 목적 외 이용 또는 제3자 제공의 관리;15의2|개인정보 수집 출처 등 통지 대상ㆍ방법ㆍ절차;15의3|개인정보 이용ㆍ제공 내역의 통지;16|개인정보의 파기방법;17|동의를 받는 방법;17의2|아동의 개인정보 보호;18|민감정보의 범위;19|고유식별정보의 범위;21|고유식별정보의 안전성 확보 조치;21의2|주민등록번호 암호화 적용 대상 등;22|고정형 영상정보처리기기 설치ㆍ운영 제한의 예외;23|고정형 영상정보처리기기 설치 시 의견 수렴;24|안내판의 설치 등;25|고정형 영상정보처리기기 운영ㆍ관리 방침;26|공공기관의 고정형 영상정보처리기기 설치ㆍ운영 사무의 위탁;27|이동형 영상정보처리기기 운영 제한의 예외;27의2|이동형 영상정보처리기기 촬영 사실 표시 등;27의3|영상정보처리기기 설치ㆍ운영 지침;28|개인정보의 처리 업무 위탁 시 조치;29|영업양도 등에 따른 개인정보 이전의 통지"],
+ ["제4장의2 가명정보의 처리에 관한 특례","29의2|결합전문기관의 지정 및 지정 취소;29의3|개인정보처리자 간 가명정보의 결합 및 반출 등;29의4|결합전문기관의 관리ㆍ감독 등;29의5|가명정보에 대한 안전성 확보 조치"],
+ ["제4장의3 개인정보의 국외 이전","29의7|국외 처리위탁ㆍ보관 시 정보주체에게 알리는 방법;29의8|개인정보의 국외 이전 인증;29의9|국가 등에 대한 개인정보 보호 수준 인정;29의10|개인정보의 국외 이전 시 보호조치 등;29의11|국외 이전 중지 명령의 기준 등;29의12|국외 이전 중지 명령에 대한 이의 제기"],
+ ["제5장 개인정보의 안전한 관리","30|개인정보의 안전성 확보 조치;30의2|공공시스템 운영기관 등의 안전성 확보 조치 등;31|개인정보 처리방침의 내용 및 공개방법 등;31의2|개인정보 처리방침의 평가 대상 및 절차;32|개인정보 보호책임자의 지정 등;32의2|개인정보 보호책임자 협의회의 사업 범위 등;32의3|국내대리인 지정 대상자의 범위 등;33|개인정보파일의 등록사항 등;34|개인정보파일의 등록 및 공개 등;34의2|개인정보 보호 인증의 기준ㆍ방법ㆍ절차 등;34의3|개인정보 보호 인증의 수수료;34의4|인증취소;34의5|인증의 사후관리;34의6|개인정보 보호 인증 전문기관;34의7|인증의 표시 및 홍보;34의8|인증심사원의 자격 및 자격 취소 요건;35|개인정보 영향평가의 대상;36|평가기관의 지정 및 지정취소;37|영향평가 시 고려사항;38|영향평가의 평가기준 등;39|개인정보 유출 등의 통지;39의2|유출등의 가능성 통지 대상;39의3|유출등의 가능성 통지 시기ㆍ방법 등;40|개인정보 유출 등의 신고;40의2|노출된 개인정보의 삭제ㆍ차단 요청 기관"],
+ ["제6장 정보주체의 권리 보장","41|개인정보의 열람절차 등;42|열람의 제한ㆍ연기 및 거절;42의2|정보전송자 기준;42의3|일반수신자 기준;42의4|전송 요구 대상 정보의 범위;42의5|전송 요구의 방법 등;42의6|개인정보 전송의 기한 및 방법 등;42의7|전송 요구 시 적용이 배제되는 법률의 규정;42의8|전송 요구의 거절 및 전송 중단 등;42의9|개인정보관리 전문기관의 업무 등;42의10|전문기관의 지정 신청 등;42의11|전문기관의 지정요건 세부기준;42의12|전문기관의 지정 등;42의13|전문기관의 금지행위;42의14|전문기관의 지정취소 등;42의15|전송 요구에 대한 보호위원회의 관리ㆍ감독;42의16|개인정보전송지원플랫폼의 구축 및 운영 등;43|개인정보의 정정ㆍ삭제 등;44|개인정보의 처리정지 등;44의2|자동화된 결정 거부 및 설명 등 요구의 방법 및 절차;44의3|거부ㆍ설명등요구에 따른 조치;44의4|자동화된 결정의 기준과 절차 등의 공개;45|대리인의 범위 등;46|정보주체 또는 대리인의 확인;47|수수료 등의 금액 등;48|열람 요구 지원시스템의 구축 등"],
+ ["제6장의2 (삭제, 1개 조 존속)","48의7|손해배상책임 이행을 위한 보험 등 가입 대상자의 범위 및 기준 등"],
+ ["제7장 개인정보 분쟁조정","48의14|당연직위원;49|조정부의 구성 및 운영;49의2|분쟁조정 전문위원회;50|사무기구;51|분쟁조정위원회 등의 운영;51의2|조정 불응 의사의 통지;51의3|사무기구 및 조사ㆍ열람 등;51의4|조정안에 대한 거부 의사 통지 등;52|집단분쟁조정의 신청 대상;53|집단분쟁조정 절차의 개시;54|집단분쟁조정 절차에 대한 참가 신청;55|집단분쟁조정 절차의 진행;56|수당과 여비;57|분쟁조정 세칙"],
+ ["제8장 보칙 및 벌칙","58|개선권고 및 징계권고;59|침해 사실의 신고 등;60|자료제출 요구 및 검사;60의2|과징금의 산정기준 등;60의3|과징금의 부과 및 납부;60의4|과징금의 납부기한 연기 및 분할 납부;60의5|환급가산금의 이자율;61|결과의 공표;62|업무의 위탁;62의2|민감정보 및 고유식별정보의 처리;62의3|규제의 재검토;63|과태료의 부과기준"]
+].map(([t,s])=>({t,arts:s.split(";").map(x=>{const[a,b]=x.split("|");return{a:"제"+a.replace("의","조의")+(a.includes("의")?"":"조"),b}})}));
+const TIMELINE=[
+ ["2011. 9. 29.","제정. 경과조치로 기본계획(제11·12조), 암호화(제30·21조), 파일 등록(제34조), 영향평가(제35조) 연결",0],
+ ["2017. 10. 17.","유출 신고 적용례(제39·40조), 열람 등 요구 경과조치(제41·43·44조)",0],
+ ["2020. 8. 4.","데이터 3법 개정. 민감정보 경과조치(제18조), 과징금·과태료(별표 1·2)",1],
+ ["2023. 9. 12.","대개정. 동의 방법(제17조①)·공공시스템(제30조의2)은 2024. 9. 15., 수집 출처 통지(제15조의2①)는 2024. 1. 1. 시행",1],
+ ["2024. 3. 12.","보호책임자(제32조) 자격 요건 경과조치",0],
+ ["2025. 2. 25.","전송요구권(제42조의2~16) 시행, 결합전문기관 재지정(제29조의2), 전문기관 지정 특례",1],
+ ["2025. 9. 23.","공공기관 범위 확대(제2조)에 따른 파일 등록(제34조)·영향평가(제35조) 특례",0],
+ ["2026. 9. 10.","보호책임자 지정 신고 특례(제32조)",0]
+];
+
+// ---------- 항목 목록 ----------
+const ITEMS=[];
+DOMAINS.forEach((d,di)=>d.units.forEach((u,ui)=>u.items.forEach((it,ii)=>{
+  ITEMS.push({key:`${d.id}-${ui}-${ii}`,d,di,u,ui,t:it[0],law:it[1],dec:it[2],star:!!it[3]});
+})));
+const DEC_CARDS=[];
+DECREE.forEach(ch=>ch.arts.forEach(a=>DEC_CARDS.push({key:"dec-"+a.a,t:a.a,ans:a.b,ch:ch.t})));
+
+// ---------- 진도 저장 ----------
+const LSK="cppg-hub-progress-v1";
+let state={items:{},updatedAt:0};
+try{const s=JSON.parse(localStorage.getItem(LSK)||"null");if(s&&s.items)state=s;}catch(e){}
+let dbRef=null,saveT=null;
+function today(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
+const DAY=86400000, IV=[1,3,7,14,30,60];
+function rec(k){return state.items[k]||null}
+function lv(k){const r=rec(k);return r?r.lv:-1}
+function save(){
+  state.updatedAt=Date.now();
+  try{localStorage.setItem(LSK,JSON.stringify(state));}catch(e){}
+  clearTimeout(saveT);
+  saveT=setTimeout(()=>{if(dbRef)dbRef.set(state).catch(()=>{});},1200);
+}
+async function connect(){
+  try{
+    const use=window.claude&&window.claude.use;if(!use)return;
+    const [db,user]=await Promise.all([use("db"),use("user")]);
+    if(!db||!user)return;
+    const id=await user.id();if(!id)return;
+    dbRef=db.doc(`data/users/${id}/progress`);
+    const snap=await dbRef.get();
+    if(snap.exists){const r=snap.data();if(r&&r.items&&(r.updatedAt||0)>(state.updatedAt||0)){state=r;try{localStorage.setItem(LSK,JSON.stringify(state));}catch(e){}renderAll();}}
+    else if(state.updatedAt){dbRef.set(state).catch(()=>{});}
+    document.getElementById("syncnote").textContent="진도는 계정에 저장되어 다른 기기에서도 이어집니다.";
+  }catch(e){}
+}
+function grade(k,g){
+  const r=rec(k)||{lv:0,due:0,n:0};
+  if(g===0){r.lv=0;r.due=today()+DAY;}
+  else if(g===1){r.lv=Math.max(1,r.lv);r.due=today()+DAY;}
+  else{r.lv=Math.min(r.lv+1,IV.length);r.due=today()+IV[r.lv-1]*DAY;}
+  r.n=(r.n||0)+1;r.last=Date.now();state.items[k]=r;save();
+}
+function mastery(k){const l=lv(k);return l<0?0:Math.min(l,3)/3}
+function lvClass(k){const l=lv(k);return l<0?"lv0":l>=3?"lv3":l>=1?"lv2":"lv1"}
+function lvLabel(k){const l=lv(k);return l<0?"미학습":l>=3?"숙련":l>=1?"학습 중":"다시 보기"}
+function domMastery(d){const its=ITEMS.filter(i=>i.d===d);return its.reduce((s,i)=>s+mastery(i.key),0)/its.length}
+
+// ---------- 요약 ----------
+function renderSummary(){
+  const t=today();
+  const all=[...ITEMS.map(i=>i.key),...DEC_CARDS.map(c=>c.key)];
+  const due=all.filter(k=>{const r=rec(k);return r&&r.due<=t}).length;
+  document.getElementById("sDue").textContent=due;
+  document.getElementById("sNew").textContent=ITEMS.filter(i=>!rec(i.key)).length;
+  document.getElementById("sMaster").textContent=ITEMS.filter(i=>lv(i.key)>=3).length;
+  document.getElementById("sTotal").textContent=ITEMS.length;
+  const ready=DOMAINS.reduce((s,d)=>s+d.w*domMastery(d),0);
+  document.getElementById("readyPct").textContent=Math.round(ready)+"%";
+  const wm=document.getElementById("weightmap");
+  if(!wm.children.length){
+    [...DOMAINS].sort((a,b)=>b.w-a.w).forEach(d=>{
+      const row=document.createElement("div");row.className="wrow";
+      row.innerHTML=`<div class="nm">${dLabel(d)} <span>${d.w}%</span></div><div class="bar"><div class="w" style="width:${d.w/30*100}%;background:var(--${d.id})"></div><div class="m" data-d="${d.id}" style="width:0;background:var(--${d.id})"></div></div><div class="pc" data-p="${d.id}"></div>`;
+      wm.appendChild(row);
+    });
+  }
+  DOMAINS.forEach(d=>{const m=domMastery(d);
+    wm.querySelector(`[data-d="${d.id}"]`).style.width=(d.w/30*100*m)+"%";
+    wm.querySelector(`[data-p="${d.id}"]`).textContent=Math.round(m*100)+"%";});
+}
+
+// ---------- 마인드맵 ----------
+let selUnit={di:3,ui:1};
+const NS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);parent&&parent.appendChild(e);return e}
+function renderMap(){
+  const svg=document.getElementById("mind");svg.innerHTML="";
+  const cx=550,cy=340,rD=165,rU=262;
+  const units=[];DOMAINS.forEach((d,di)=>d.units.forEach((u,ui)=>units.push({d,di,u,ui})));
+  const N=units.length,off=-Math.PI/2+Math.PI/N;
+  units.forEach((x,i)=>x.a=off+i*2*Math.PI/N);
+  const g1=el("g",{},svg),g2=el("g",{},svg);
+  DOMAINS.forEach((d,di)=>{
+    const us=units.filter(x=>x.di===di);const a=us.reduce((s,x)=>s+x.a,0)/us.length;
+    const dx=cx+rD*Math.cos(a),dy=cy+rD*Math.sin(a);
+    el("path",{d:`M${cx},${cy} L${dx},${dy}`,stroke:`var(--${d.id})`,"stroke-width":4,fill:"none",opacity:.55},g1);
+    us.forEach(x=>{
+      const ux=cx+rU*Math.cos(x.a),uy=cy+rU*Math.sin(x.a);x.x=ux;x.y=uy;
+      const mx=(dx+ux)/2+ (cx-(dx+ux)/2)*-0.08,my=(dy+uy)/2+(cy-(dy+uy)/2)*-0.08;
+      el("path",{d:`M${dx},${dy} Q${mx},${my} ${ux},${uy}`,stroke:`var(--${d.id})`,"stroke-width":2,fill:"none",opacity:.5},g1);
+    });
+    const m=domMastery(d);
+    const gd=el("g",{},g2);
+    el("circle",{cx:dx,cy:dy,r:54,fill:"var(--sheet)",stroke:`var(--${d.id})`,"stroke-width":3},gd);
+    // 숙련 호
+    if(m>0){const r=54,ang=m*2*Math.PI-0.0001,x1=dx,y1=dy-r,x2=dx+r*Math.sin(ang),y2=dy-r*Math.cos(ang);
+      el("path",{d:`M${x1},${y1} A${r},${r} 0 ${ang>Math.PI?1:0} 1 ${x2},${y2}`,stroke:"var(--ink)","stroke-width":5,fill:"none",opacity:.75},gd);}
+    const rn=el("text",{x:dx,y:dy-30,"text-anchor":"middle","font-size":13,"font-weight":700,fill:`var(--${d.id})`},gd);rn.textContent=ROMAN[di];
+    const words=d.name.split(" ");const lines=words.length>2?[words[0],words.slice(1).join(" ")]:words.length===2?words:[d.name];
+    lines.forEach((ln,li)=>{const tx=el("text",{x:dx,y:dy-6+li*16-(lines.length-1)*6,"text-anchor":"middle","font-size":13,"font-weight":600},gd);tx.textContent=ln;});
+    const w=el("text",{x:dx,y:dy+31,"text-anchor":"middle","font-size":12,fill:`var(--${d.id})`,"font-weight":600},gd);w.textContent=`배점 ${d.w}%`;
+  });
+  const c=el("g",{},g2);
+  el("circle",{cx,cy,r:58,fill:"var(--ink)"},c);
+  const t1=el("text",{x:cx,y:cy-4,"text-anchor":"middle","font-size":22,"font-weight":700,style:"fill:var(--sheet);font-family:var(--f-display)"},c);t1.textContent="CPPG";
+  const t2=el("text",{x:cx,y:cy+18,"text-anchor":"middle","font-size":11.5,style:"fill:var(--sheet)"},c);t2.textContent="개인정보관리사";
+  units.forEach(x=>{
+    const its=ITEMS.filter(i=>i.di===x.di&&i.ui===x.ui);
+    const m=its.reduce((s,i)=>s+mastery(i.key),0)/its.length;
+    const g=el("g",{class:"node"+(selUnit.di===x.di&&selUnit.ui===x.ui?" sel":""),tabindex:0,role:"button","aria-label":`${dLabel(x.d)} › ${uLabel(x.d,x.u)}`},g2);
+    el("circle",{cx:x.x,cy:x.y,r:13,fill:"var(--sheet)",stroke:`var(--${x.d.id})`,"stroke-width":2.5},g);
+    el("circle",{cx:x.x,cy:x.y,r:Math.max(0.01,10*m),fill:`var(--${x.d.id})`},g);
+    const cos=Math.cos(x.a),sin=Math.sin(x.a);
+    const anchor=cos>=0?"start":"end";
+    const lx=x.x+cos*20+(cos>=0?6:-6),ly=x.y+sin*20+(sin>0.7?10:sin<-0.7?-16:5);
+    const ul=wrap(uLabel(x.d,x.u),14);const ly0=sin<-0.7?ly-(ul.length-1)*17:ly;
+    ul.forEach((t,j)=>{const tx=el("text",{x:lx,y:ly0+j*17,"text-anchor":anchor,"font-size":14,"font-weight":500},g);tx.textContent=t;});
+    const st=el("text",{x:lx,y:ly0+(ul.length-1)*17+17,"text-anchor":anchor,"font-size":11.5,style:"fill:var(--muted)"},g);
+    st.textContent=`${its.length}개 항목 · 숙련 ${Math.round(m*100)}%`+(its.some(i=>i.star)?" · ★":"");
+    const pick=()=>{selUnit={di:x.di,ui:x.ui};renderMap();renderPanel();};
+    g.addEventListener("click",pick);
+    g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}});
+  });
+}
+const ROMAN=["Ⅰ","Ⅱ","Ⅲ","Ⅳ","Ⅴ"];
+function dLabel(d){return ROMAN[DOMAINS.indexOf(d)]+". "+d.name}
+function uLabel(d,u){return (d.units.indexOf(u)+1)+". "+u.n}
+function wrap(s,n){if(s.length<=n)return[s];const sp=[...s.matchAll(/ /g)].map(m=>m.index);if(!sp.length)return[s];const mid=s.length/2;const i=sp.reduce((a,b)=>Math.abs(b-mid)<Math.abs(a-mid)?b:a);return[s.slice(0,i),s.slice(i+1)]}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function renderPanel(){
+  const d=DOMAINS[selUnit.di],u=d.units[selUnit.ui];
+  const its=ITEMS.filter(i=>i.di===selUnit.di&&i.ui===selUnit.ui);
+  const p=document.getElementById("panel");
+  p.innerHTML=`<div class="crumb">${esc(dLabel(d))} · 배점 ${d.w}%</div><h3 style="color:var(--${d.id})">${esc(uLabel(d,u))}</h3>
+  <ul class="items">${its.map(i=>`<li><div class="t"><b>${esc(i.t)}${i.star?' <span class="star">★ 빈출</span>':""}</b><span class="lvl ${lvClass(i.key)}">${lvLabel(i.key)}</span></div>
+  <div class="refs"><span><em>법</em>${esc(i.law)}</span><span><em>시행령</em>${esc(i.dec)}</span></div></li>`).join("")}</ul>
+  <div><button class="btn primary" type="button" id="studyUnit">이 단원 카드로 복습</button></div>`;
+  document.getElementById("studyUnit").onclick=()=>{
+    const v=`u:${selUnit.di}:${selUnit.ui}`;const s=document.getElementById("deckSel");
+    if(![...s.options].some(o=>o.value===v)){const o=document.createElement("option");o.value=v;o.textContent=`단원: ${ROMAN[selUnit.di]}-${uLabel(d,u)}`;s.appendChild(o);}
+    s.value=v;buildDeck();document.getElementById("cards").scrollIntoView({behavior:"smooth"});
+  };
+}
+
+// ---------- 카드 ----------
+let deck=[],pos=0,flipped=false;
+function initDeckSel(){
+  const s=document.getElementById("deckSel");
+  const opts=[["due","오늘 복습 + 새 항목"],["star","★ 빈출 항목만"],["all","출제영역 전체"],...DOMAINS.map(d=>["d:"+d.id,`${dLabel(d)} (${d.w}%)`]),["dec","시행령 조문 번호 → 제목"]];
+  s.innerHTML=opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
+  s.onchange=buildDeck;
+}
+function itemCard(i){return{key:i.key,tag:`${dLabel(i.d)} › ${uLabel(i.d,i.u)}`,q:i.t,sub:"법률과 시행령의 관련 조문은?",a:`법  ${i.law}\n시행령  ${i.dec}`,star:i.star}}
+function decCard(c){return{key:c.key,tag:c.ch,q:`시행령 ${c.t}`,sub:"조 제목은?",a:c.ans}}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function buildDeck(){
+  const v=document.getElementById("deckSel").value,t=today();
+  let src;
+  if(v==="due"){
+    const due=[...ITEMS.map(itemCard),...DEC_CARDS.map(decCard)].filter(c=>{const r=rec(c.key);return r&&r.due<=t});
+    const fresh=ITEMS.filter(i=>!rec(i.key)).sort((a,b)=>b.d.w-a.d.w||(b.star-a.star)).slice(0,Math.max(0,15-due.length)).map(itemCard);
+    src=[...shuffle(due),...fresh];
+  }else if(v==="star")src=shuffle(ITEMS.filter(i=>i.star).map(itemCard));
+  else if(v==="all")src=shuffle(ITEMS.map(itemCard));
+  else if(v==="dec")src=shuffle(DEC_CARDS.map(decCard));
+  else if(v.startsWith("d:"))src=shuffle(ITEMS.filter(i=>i.d.id===v.slice(2)).map(itemCard));
+  else if(v.startsWith("u:")){const[,a,b]=v.split(":");src=ITEMS.filter(i=>i.di==a&&i.ui==b).map(itemCard);}
+  deck=src;pos=0;flipped=false;renderCard();
+}
+function renderCard(){
+  const c=document.getElementById("card"),cnt=document.getElementById("counter");
+  const btns=[0,1,2].map(g=>document.getElementById("g"+g));
+  if(pos>=deck.length){
+    c.innerHTML=`<div class="tag">덱 완료</div><div class="q">${deck.length?"이번 덱을 모두 봤습니다.":"지금 복습할 카드가 없습니다."}</div><div class="hint">다른 덱을 고르거나, 마인드맵에서 단원을 골라 이어서 공부하세요.</div>`;
+    btns.forEach(b=>b.disabled=true);cnt.textContent=deck.length?`${deck.length} / ${deck.length}`:"";return;
+  }
+  const k=deck[pos];
+  c.innerHTML=`<div class="tag">${esc(k.tag)}${k.star?' · <span class="star">★ 빈출</span>':""} · <span class="lvl ${lvClass(k.key)}">${lvLabel(k.key)}</span></div>
+  <div class="q">${esc(k.q)}</div><div class="hint">${esc(k.sub)}</div>
+  ${flipped?`<div class="a">${esc(k.a)}</div>`:`<div class="hint">눌러서 답 보기</div>`}`;
+  btns.forEach(b=>b.disabled=!flipped);
+  cnt.textContent=`${pos+1} / ${deck.length}`;
+}
+document.getElementById("card").onclick=()=>{if(pos<deck.length){flipped=!flipped;renderCard();}};
+[0,1,2].forEach(g=>document.getElementById("g"+g).onclick=()=>{
+  if(!flipped||pos>=deck.length)return;
+  grade(deck[pos].key,g);
+  if(g===0)deck.push(deck[pos]);
+  pos++;flipped=false;renderCard();renderSummary();renderMap();renderPanel();
+});
+document.addEventListener("keydown",e=>{
+  if(e.target.closest&&e.target.closest("select,input,textarea"))return;
+  const r=document.getElementById("cards").getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;
+  if(e.key===" "&&document.activeElement===document.getElementById("card"))return;
+  if(["1","2","3"].includes(e.key)&&flipped){document.getElementById("g"+(+e.key-1)).click();}
+});
+
+// ---------- 시행령 색인 ----------
+function renderDecree(){
+  document.getElementById("chapters").innerHTML=DECREE.map(ch=>`<details><summary>${esc(ch.t)}<span>${ch.arts.length}개 조</span></summary><ul>${ch.arts.map(a=>`<li><em>${a.a}</em>${esc(a.b)}</li>`).join("")}</ul></details>`).join("");
+  document.getElementById("timeline").innerHTML=TIMELINE.map(([d,t,k])=>`<li class="${k?"key":""}"><span class="dt">${d}</span>${k?' <span class="star">핵심</span>':""}<div>${esc(t)}</div></li>`).join("");
+}
+
+function renderAll(){renderSummary();renderMap();renderPanel();buildDeck();}
+initDeckSel();renderDecree();renderAll();connect();
+</script>
+
+</body></html>
