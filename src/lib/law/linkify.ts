@@ -30,6 +30,24 @@ const NAMED_TAIL = new RegExp(`(「[^」]*」)${DEFINED}[\\s,]*$`)
  * 다른 법령(「…」, '정보통신망법' 등)이면 null(링크 안 함), 그 외는 own.
  */
 export function refKindFor(prefixText: string, own: DocKind): DocKind | null {
+  const direct = kindFromTail(prefixText, own)
+  if (direct !== own) return direct
+  // '영 제16조제2항, 제30조 및 제30조의2'처럼 이어진 참조는 묶음 맨 앞의 법령을 따른다.
+  let rest = prefixText
+  let walked = false
+  for (;;) {
+    const m = RUN_TAIL.exec(rest)
+    if (!m) break
+    rest = rest.slice(0, m.index)
+    walked = true
+  }
+  return walked ? kindFromTail(rest, own) : own
+}
+
+const RUN_TAIL =
+  /제\d+조(?:의\d+)?(?:제\d+항)?(?:제\d+호)?(?:[가-힣]목)?(?:[,ㆍ·]\s*|\s*(?:및|또는|부터|과|와)\s*)$/
+
+function kindFromTail(prefixText: string, own: DocKind): DocKind | null {
   const tail = prefixText.slice(-40)
   const named = NAMED_TAIL.exec(tail)
   if (named) {

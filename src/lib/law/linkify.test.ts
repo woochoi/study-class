@@ -60,3 +60,13 @@ test('refKindFor: 다른 법령·정의 약칭·단독 법/영', () => {
   assert.equal(refKindFor('', 'decree'), 'decree')
   assert.equal(refKindFor('제1항 및 ', 'decree'), 'decree')
 })
+
+test('refKindFor: 쉼표·및으로 이어진 참조는 앞의 법/영을 이어받는다', () => {
+  assert.equal(refKindFor('같은 법 시행령(이하 "영"이라 한다) 제16조제2항, ', 'notice'), 'decree')
+  assert.equal(refKindFor('영 제16조제2항, 제30조 및 ', 'notice'), 'decree')
+  assert.equal(refKindFor('법 제15조ㆍ', 'notice'), 'law')
+  assert.equal(refKindFor('「전자정부법」 제5조 및 ', 'notice'), null)
+  // 앞에 법/영이 없으면 자기 문서, 문장이 끊기면 이어받지 않는다.
+  assert.equal(refKindFor('5. 제16조부터 ', 'notice'), 'notice')
+  assert.equal(refKindFor('다만, 법 제23조에 따른 민감정보 또는 ', 'notice'), 'notice')
+})
