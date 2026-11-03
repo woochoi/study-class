@@ -3,7 +3,7 @@ import type { ParsedArticle, ParsedChapter, ParsedDocument } from './types.ts'
 import { asList, asRec, isoDate, optStr, parseChapterHeading, shapeError, str } from './shape.ts'
 
 function textOf(v: unknown, where: string): string {
-  if (Array.isArray(v)) return v.map((x) => str(x, where)).join('\n')
+  if (Array.isArray(v)) return v.map((x) => textOf(x, where)).join('\n')
   return str(v, where)
 }
 

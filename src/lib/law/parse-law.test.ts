@@ -44,3 +44,21 @@ test('upcoming law: 전문 with same number is not an article', () => {
 test('wrong shape throws', () => {
   assert.throws(() => parseLawDocument({}, { kind: 'law', isUpcoming: false }), /unexpected law api shape/)
 })
+
+test('nested array 목내용 (live API shape) is flattened', () => {
+  const json = {
+    법령: {
+      기본정보: { 법령명_한글: '테스트', 공포번호: '1', 공포일자: '20260101', 시행일자: '20260102' },
+      조문: {
+        조문단위: [
+          {
+            조문여부: '조문', 조문번호: '1', 조문제목: '제목', 조문내용: '제1조(제목)',
+            항: [{ 호: [{ 호내용: '1. 가', 목: [{ 목내용: [['가. 나', '      1) 다']] }] }] }],
+          },
+        ],
+      },
+    },
+  }
+  const doc = parseLawDocument(json, { kind: 'decree', isUpcoming: false })
+  assert.equal(doc.articles[0].body, '제1조(제목)\n  1. 가\n    가. 나\n      1) 다')
+})
