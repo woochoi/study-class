@@ -170,4 +170,14 @@
   & a:focus-visible, & button:focus-visible, & input:focus-visible, & select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   .notice{margin:0 0 16px;border-radius:8px;padding:8px 12px;font-size:13.5px;background:var(--sunk);color:var(--c4)}
   .artinfo a{margin-left:10px;font-size:13px;color:var(--accent)}
-  }
+  /* decree index */
+  .chapters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  @media (max-width:720px){.chapters{grid-template-columns:minmax(0,1fr)}}
+  & details{border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--surface);min-width:0}
+  & summary{cursor:pointer;font-weight:600;font-size:14.5px;display:flex;justify-content:space-between;gap:8px}
+  & summary span{color:var(--muted);font-weight:400;font-size:13px;white-space:nowrap}
+  & details ul{margin:8px 0 2px;padding-left:0;list-style:none;font-size:13.5px;display:flex;flex-direction:column;gap:3px}
+  & details li em{font-style:normal;font-family:var(--f-mono);font-size:12px;display:inline-block;min-width:78px}
+  & details li em a, & td.law a, & .tl .ev a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+  .tl .yr{overflow-wrap:anywhere}
+}
