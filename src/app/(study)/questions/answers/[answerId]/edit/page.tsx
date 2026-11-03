@@ -21,7 +21,7 @@ export default async function EditAnswerPage({ params }: { params: Promise<{ ans
     <section className="panel">
       <div className="board-head">
         <h2>답변 수정</h2>
-        <Link href={`/questions/${a.questionId}#answer-${a.id}`}>← 돌아가기</Link>
+        <Link href={`/questions/${a.questionId}`}>← 돌아가기</Link>
       </div>
       <AnswerForm action={updateAnswerAction.bind(null, a.id)} initial={a.body} submitLabel="저장" id="answer-edit-body" />
     </section>

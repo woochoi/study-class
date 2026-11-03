@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth/current-user.ts'
 import { createAnswer, deleteAnswer, getAnswer, updateAnswer } from '@/lib/board/answers-db.ts'
-import { createQuestion, deleteQuestion, updateQuestion, type WriteResult } from '@/lib/board/questions-db.ts'
+import { createQuestion, deleteQuestion, getQuestion, updateQuestion, type WriteResult } from '@/lib/board/questions-db.ts'
 import { parseId, validateAnswer, validateQuestion, type FieldErrors } from '@/lib/board/validate.ts'
 
 export type FormState = {
@@ -83,7 +83,7 @@ export async function createAnswerAction(
   if (!v.ok) return { error: v.error, value }
   const r = await createAnswer(user.id, qid, v.value)
   if (!r.ok) return { error: failState(r.reason, undefined).message, value }
-  redirect(`/questions/${qid}#answer-${r.id}`)
+  redirect(`/questions/${qid}`)
 }
 
 export async function updateAnswerAction(
@@ -102,7 +102,7 @@ export async function updateAnswerAction(
   if (!r.ok) return { error: failState(r.reason, undefined).message, value }
   // Ruling R2: 질문 id는 답변에서 다시 읽는다.
   const a = await getAnswer(aid)
-  redirect(a ? `/questions/${a.questionId}#answer-${aid}` : '/questions')
+  redirect(a ? `/questions/${a.questionId}` : '/questions')
 }
 
 export async function deleteAnswerAction(answerId: string): Promise<void> {
@@ -110,5 +110,7 @@ export async function deleteAnswerAction(answerId: string): Promise<void> {
   const aid = parseId(answerId)
   if (!user || !aid) redirect('/questions')
   const r = await deleteAnswer(user.id, aid)
-  redirect(r.ok ? `/questions/${r.questionId}` : '/questions')
+  if (!r.ok) redirect('/questions')
+  // 소프트 삭제된 질문의 마지막 답변을 지우면 질문 상세가 404가 되므로 목록으로 보낸다.
+  redirect((await getQuestion(r.questionId)) ? `/questions/${r.questionId}` : '/questions')
 }
