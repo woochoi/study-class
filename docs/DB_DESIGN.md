@@ -233,19 +233,20 @@ erDiagram
 
 ## 4. seed 출처
 
+데이터는 두 경로로 적재한다. 법령 원문은 `npm run sync:laws`(API), 학습 구조는 `npm run seed`(JSON)이며 둘 다 `ON CONFLICT` upsert라 재실행해도 조문·카드 id가 유지된다.
+
 | 테이블 | 출처 |
 |---|---|
-| `areas`, `units`, `unit_leaves` | `CPPG 법령 허브.html`의 `AREAS` (대단원, `subs`, `leaves`) |
-| `law_chapters`, `articles`(제목·장 소속) | `CPPG 법령 허브.html`의 `CHAPTERS`, `CPPG 시행령 허브.html`의 `DECREE` |
-| `anchors` | `CPPG 법령 허브.html`의 `ANCHORS` |
-| `mnemonics` | `CPPG 법령 허브.html`의 `MNEMO` |
-| `cards` | `CPPG 법령 허브.html`의 `CARDS`, 시행령 허브의 `ITEMS`/`DEC_CARDS` (`DOMAINS`·`DECREE`에서 생성) |
-| `history_events` | `CPPG 법령 허브.html`의 `HISTORY`, `CPPG 시행령 허브.html`의 `TIMELINE` |
-| `unit_items` | `CPPG 시행령 허브.html`의 `DOMAINS[].units[].items` |
-| `law_documents` | `docs/sources/법령체계도_개인정보_보호법.xlsx` (법·시행령·고시 이름·번호·시행일) |
-| `articles.body` | 국가법령정보센터 OPEN API 동기화(법률·시행령·고시). 고시는 실패 시 `docs/sources/개인정보의 안전성 확보조치 기준(…)(제2026-9호)(20260701).pdf` |
-| `article_links` | 법 ↔ 영은 API 또는 `docs/sources/개인정보 보호법(3단비교).pdf`, 영 ↔ 고시는 허브 매핑(예: `영30① · 고시 제7조`) |
+| `law_documents` | `npm run sync:laws`가 국가법령정보센터 OPEN API에서 채움 (`source='api'`). 법률 제21445호, 시행 예정 법률 제21910호, 시행령 제36671호, 고시 제2026-9호 |
+| `law_chapters`, `articles` (제목·장·`body`) | `npm run sync:laws`가 API 응답으로 채움 (`source='api'`) |
+| `article_links` (법 ↔ 시행령) | `npm run sync:laws`가 API 3단비교에서 채움 |
+| `article_links` (시행령 ↔ 고시) | `db/seed/notice-links.json` (허브 매핑, 예: `영30① · 고시 제7조`)을 sync가 반영 |
+| `areas`, `units`, `unit_leaves`, `anchors`, `mnemonics`, 법 카드·`history_events` (law) | `db/seed/hub-law.json` (`CPPG 법령 허브.html`에서 `scripts/extract-hub-data.ts`로 추출) |
+| `unit_items`, 시행령 카드·`history_events` (decree) | `db/seed/hub-decree.json` (`CPPG 시행령 허브.html`에서 동일 스크립트로 추출) |
+| 테스트용 법령 | `test/fixtures/law-api/*` (`law.json`, `law-upcoming.json`, `decree.json`, `admrul.json`, `thdcmp.json`) — API 응답 fixture |
 | `users`, `sessions`, `user_*`, `questions`, `answers` | seed 없음 (런타임 생성) |
+
+`docs/sources/`의 PDF·엑셀은 교차 검증용으로만 보관하며 앱은 읽지 않는다.
 
 ## 5. Supabase / Neon 이전 시 주의
 
