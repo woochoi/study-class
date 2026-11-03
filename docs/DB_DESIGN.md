@@ -228,7 +228,7 @@ erDiagram
 
 | 테이블 | 컬럼 (제약) | 용도 |
 |---|---|---|
-| `questions` | id PK · author_id → users · article_id → articles ON DELETE SET NULL · title text CHECK length 1~200 · body text CHECK length 1~5000 · created_at · updated_at · deleted_at timestamptz · INDEX(created_at DESC) · INDEX(article_id) | 질문. `deleted_at`으로 소프트 삭제, `article_id`가 조문 태그 |
+| `questions` | id PK · author_id → users · article_id → articles ON DELETE SET NULL · title text CHECK length 1~200 · body text CHECK length 1~5000 · created_at · updated_at · deleted_at timestamptz · INDEX(created_at DESC) · INDEX(article_id) | 질문. `deleted_at`으로 소프트 삭제, `article_id`가 조문 태그 (저장 시 (kind, key)로 찾으며 현행 문서를 우선, 없으면 시행 예정 문서. 목록 필터는 같은 (kind, key)의 모든 문서 버전 포함) |
 | `answers` | id PK · question_id → questions ON DELETE CASCADE · author_id → users · body text CHECK length 1~5000 · created_at · updated_at · INDEX(question_id, created_at) | 답변 |
 
 ## 4. seed 출처

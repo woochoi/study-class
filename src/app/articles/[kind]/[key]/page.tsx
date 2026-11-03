@@ -4,6 +4,7 @@ import { connection } from 'next/server'
 import ArticleRefText from '@/app/_components/ArticleRefText.tsx'
 import { formatArticleKey } from '@/lib/law/article-key.ts'
 import { getThreeTier, parseArticleParams, type ArticleView } from '@/lib/law/three-tier.ts'
+import { countQuestionsForTag } from '@/lib/board/questions-db.ts'
 import type { DocKind } from '@/lib/law/types.ts'
 import '@/app/(study)/study.css'
 import './article.css'
@@ -49,6 +50,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ kind: 
   await connection()
   const t = await getThreeTier(parsed.kind, parsed.key)
   if (!t) notFound()
+  const questionCount = await countQuestionsForTag({ kind: t.entry.kind, key: t.entry.key })
+  const tagQuery = `kind=${t.entry.kind}&key=${encodeURIComponent(t.entry.key)}`
   const cols: { kind: DocKind; items: ArticleView[] }[] = [
     { kind: 'law', items: t.law },
     { kind: 'decree', items: t.decree },
@@ -93,7 +96,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ kind: 
             ))}
           </ul>
           <p>
-            <Link href={`/questions/new?kind=${t.entry.kind}&key=${encodeURIComponent(t.entry.key)}`}>이 조문에 대해 질문하기</Link>
+            <Link href={`/questions/new?${tagQuery}`}>이 조문에 대해 질문하기</Link>
+            {questionCount > 0 && (
+              <>
+                {' · '}
+                <Link href={`/questions?${tagQuery}`}>이 조문 질문 {questionCount}개 보기</Link>
+              </>
+            )}
           </p>
           <h3>관련 결정문</h3>
           <p className="hint">준비 중이에요</p>
