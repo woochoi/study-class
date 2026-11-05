@@ -1,6 +1,7 @@
 import 'server-only'
 import pg from 'pg'
 import type { PoolClient, QueryResult, QueryResultRow } from 'pg'
+import { normalizeConnectionString, POOL_OPTIONS } from './db-config.ts'
 
 let pool: pg.Pool | undefined
 
@@ -10,7 +11,10 @@ function getPool(): pg.Pool {
     if (!connectionString) {
       throw new Error('DATABASE_URL is not set. Copy .env.example to .env and fill it in.')
     }
-    pool = new pg.Pool({ connectionString })
+    pool = new pg.Pool({
+      connectionString: normalizeConnectionString(connectionString),
+      ...POOL_OPTIONS,
+    })
     pool.on('error', (e) => console.error('pg pool idle client error:', e.message))
   }
   return pool
