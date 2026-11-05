@@ -5,14 +5,6 @@ export const metadata: Metadata = {
   title: "개인정보 처리방침 | ISMS-P 스터디 까페",
 };
 
-function Todo({ children }: { children: string }) {
-  return (
-    <mark className="rounded bg-yellow-200 px-1 font-semibold text-black">
-      {children}
-    </mark>
-  );
-}
-
 function Basis({ href, label }: { href: string; label: string }) {
   return (
     <Link
@@ -28,9 +20,6 @@ export default function PrivacyPage() {
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 break-words px-4 py-6 leading-relaxed">
       <h1 className="mb-4 text-2xl font-bold">개인정보 처리방침</h1>
-      <p className="mb-6 rounded border border-yellow-500 bg-yellow-100 p-3 text-sm text-black">
-        초안 — 운영자가 검토 후 확정
-      </p>
       <p className="mb-6">
         ISMS-P 스터디 까페(이하 &quot;까페&quot;)는 개인정보 보호법에 따라
         이용자의 개인정보를 보호하고 관련 고충을 처리하기 위해 다음과 같이
@@ -95,12 +84,13 @@ export default function PrivacyPage() {
         </h2>
         <ul className="list-disc pl-5">
           <li>
-            이전받는 자: Vercel Inc. (호스팅), 서버 위치:{" "}
-            <Todo>[Vercel 함수 리전]</Todo>, 연락처: <Todo>[Vercel 연락처]</Todo>
+            이전받는 자: Vercel Inc. (호스팅), 서버 위치: 싱가포르(AWS
+            ap-southeast-1, sin1), 연락처: privacy@vercel.com
           </li>
           <li>
-            이전받는 자: Neon (데이터베이스), 서버 위치: <Todo>[Neon 리전]</Todo>
-            , 연락처: <Todo>[Neon 연락처]</Todo>
+            이전받는 자: Neon, LLC (데이터베이스, Databricks, Inc. 계열),
+            서버 위치: 싱가포르(AWS ap-southeast-1), 연락처:
+            privacy@databricks.com
           </li>
         </ul>
         <ul className="mt-2 list-disc pl-5">
@@ -178,10 +168,10 @@ export default function PrivacyPage() {
         </h2>
         <ul className="list-disc pl-5">
           <li>
-            이름: <Todo>[이름]</Todo>
+            이름: 최웅식
           </li>
           <li>
-            연락처: <Todo>[연락처]</Todo>
+            연락처: epee2000@gmail.com
           </li>
         </ul>
       </section>
@@ -189,7 +179,7 @@ export default function PrivacyPage() {
       <section className="mb-6">
         <h2 className="mb-2 text-lg font-semibold">11. 시행일</h2>
         <p>
-          이 처리방침은 <Todo>[시행일]</Todo>부터 시행합니다.
+          이 처리방침은 2026년 11월 5일부터 시행합니다.
         </p>
       </section>
     </main>
