@@ -124,6 +124,59 @@ docker compose up -d --wait
 3. 발급된 클라이언트 ID/시크릿을 `.env`의 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`에 넣습니다.
 4. 사이트는 `APP_URL`과 같은 호스트(`http://localhost:3000`)로 여세요. `localhost`와 `127.0.0.1`을 섞으면 로그인 쿠키가 맞지 않아 로그인이 깨집니다.
 
+## 배포 (Vercel + Neon)
+
+운영은 Vercel(앱) + Neon(PostgreSQL)으로 배포합니다. 로컬 개발(Docker DB + `npm run dev`)과 `npm test`(로컬 TEST DB)는 그대로입니다. 자세한 설계는 [배포 설계](docs/superpowers/specs/2026-11-05-vercel-neon-deploy-design.md)를 보세요. 아래 순서대로 진행합니다.
+
+- [ ] **1. Neon 프로젝트 만들기**: 아시아 리전으로 프로젝트를 만들고 연결 문자열 두 가지를 복사합니다. pooled(호스트에 `-pooler`가 있음)는 Vercel용, direct(`-pooler` 없음)는 집 PC의 스키마·데이터 적재용입니다. 콘솔이 주는 문자열(`sslmode=require` 등)은 **그대로** 붙여 넣으면 됩니다. 코드가 SSL 인증서 검증(`verify-full`)으로 정규화합니다.
+- [ ] **2. `.env.neon` 만들기** (집 PC): 견본을 복사해 direct 연결 문자열을 `DATABASE_URL`에, 인증키를 `LAW_API_OC`에 넣습니다. `.env.neon`은 Git에 올라가지 않습니다.
+
+```bash
+cp .env.neon.example .env.neon
+```
+
+- [ ] **3. 스키마 적용**: 실행하면 맨 처음 `대상 DB: <호스트> (neon)`이 출력됩니다. **이 호스트가 방금 만든 Neon 프로젝트인지 확인한 뒤** 진행하세요. Node의 `--env-file`은 셸에 이미 `export`된 변수를 덮어쓰지 않으므로, 셸에서 `export DATABASE_URL=...`을 하지 마세요(했다면 다른 DB로 접속할 수 있으니 출력된 호스트로 반드시 확인). `.neon.tech`가 아닌 호스트는 명령이 거부합니다.
+
+```bash
+npm run db:apply:neon
+```
+
+- [ ] **4. 법령 동기화**: `LAW_API_OC`는 open.law.go.kr에 등록한 IP에서만 동작하므로 **집 PC**에서 실행합니다.
+
+```bash
+npm run sync:laws:neon
+```
+
+- [ ] **5. 학습 데이터 적재**
+
+```bash
+npm run seed:neon
+```
+
+- [ ] **6. Vercel 프로젝트 이름 확정**: 운영 주소 `https://<이름>.vercel.app`이 이름으로 정해지므로(기본 `study-class`) 먼저 정해 두면 구글 설정과 `APP_URL`을 한 번에 맞출 수 있습니다.
+- [ ] **7. 구글 콘솔**: OAuth 클라이언트 secret을 재발급하고, 승인된 리디렉션 URI에 `https://<이름>.vercel.app/auth/google/callback`을 추가합니다. 리디렉션 URI는 정확히 일치해야 합니다.
+- [ ] **8. Vercel 가져오기와 환경 변수**: GitHub 저장소를 가져온 뒤 **Production에만** 아래 변수를 입력합니다. Function Region은 Neon과 같은 아시아 리전으로 맞춥니다(Settings > Functions).
+  - `DATABASE_URL`: Neon **pooled** 연결 문자열
+  - `APP_URL`: `https://<이름>.vercel.app` (끝에 `/` 없이, https)
+  - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: 구글 콘솔 값(재발급한 secret)
+- [ ] **9. 배포**: 배포를 실행하고 `https://<이름>.vercel.app`이 열리는지 확인합니다.
+- [ ] **10. `/privacy` 확정**: `src/app/privacy/page.tsx`의 `[Vercel 함수 리전]`, `[Neon 리전]`, `[Vercel 연락처]`, `[Neon 연락처]`, `[이름]`, `[연락처]`, `[시행일]`을 실제 값으로 바꾸고 문구를 검토한 뒤 상단 "초안" 안내 문구를 지우고 다시 배포합니다.
+- [ ] **11. 동의 화면 게시**: 구글 콘솔 OAuth 동의 화면에 홈페이지(`https://<이름>.vercel.app`)와 개인정보처리방침(`https://<이름>.vercel.app/privacy`) 링크를 넣고 **프로덕션으로 게시**합니다. `/privacy`가 확정된 뒤에 하세요. 그래야 테스트 사용자 등록 없이 누구나 구글로 가입합니다.
+- [ ] **12. 완료 기준 확인**: 다른 구글 계정으로 배포 주소에서 가입 → 회독 체크·카드 단계·시험일 저장 → 질문 작성 → 또 다른 계정이 답변 → 다시 접속해도 모두 남아 있는지 확인합니다. 확인되면 지인에게 주소를 공유합니다.
+
+### 배포 참고
+
+- **주의**: `npm run dev`/`next start`에는 대상 DB 가드가 없습니다. Neon 주소를 `.env`에 절대 넣지 마세요. Neon 주소는 `.env.neon`(집 PC 스크립트)과 Vercel 환경 변수에만 둡니다.
+- **연결 수**: 앱의 DB 연결 풀은 최대 5개, 유휴 10초입니다. 서버리스 인스턴스가 여럿 떠도 Neon pooler(`-pooler` 주소)가 받아 줍니다.
+- **미리보기 배포**: Production에만 환경 변수를 넣으므로 미리보기 배포에는 DB가 없습니다. DB를 쓰는 화면은 오류가 날 수 있으며 정상입니다. `/privacy`는 DB 없이 열립니다.
+- **삭제 요청 처리**: [삭제 절차](docs/ops/README.md)를 따릅니다. 처음 쓰기 전에 Neon 테스트 브랜치에서 삭제 SQL을 Neon SQL Editor로 한 번 시험 실행하세요(편집기에서 여러 문을 트랜잭션으로 실행하는 동작은 로컬에서 확인하지 못했습니다).
+
+### 배포 문제 해결
+
+- **구글 로그인이 실패함**: `APP_URL`이 `https://<이름>.vercel.app` 형태인지(끝 `/` 없음, https), 구글 콘솔의 리디렉션 URI가 `APP_URL` + `/auth/google/callback`과 정확히 일치하는지, 동의 화면이 프로덕션으로 게시되었는지 확인합니다.
+- **"운영 명령의 대상이 Neon이 아닙니다" 오류**: `.env.neon`의 `DATABASE_URL`이 Neon(`.neon.tech`) 주소인지 확인합니다. 반대로 "로컬 명령이 Neon DB에 접속하려 합니다" 오류가 나면 `.env`의 `DATABASE_URL`이 Neon을 가리키는 것입니다.
+- **`sync:laws:neon`이 `register this machine IP` 오류로 실패함**: open.law.go.kr에 현재 집 IP를 다시 등록하세요.
+
 ## 문서
 
 - [PRD.md](PRD.md)
@@ -132,3 +185,6 @@ docker compose up -d --wait
 - [플랜 1 구현 계획](docs/superpowers/plans/2026-11-03-plan1-foundation-google-login.md)
 - [플랜 2 구현 계획](docs/superpowers/plans/2026-11-03-plan2-dashboard-three-tier.md)
 - [플랜 3 구현 계획](docs/superpowers/plans/2026-11-03-plan3-question-board.md)
+- [배포 설계 (Vercel + Neon)](docs/superpowers/specs/2026-11-05-vercel-neon-deploy-design.md)
+- [플랜 4 구현 계획](docs/superpowers/plans/2026-11-05-plan4-vercel-neon-deploy.md)
+- [삭제 요청 처리 절차](docs/ops/README.md)

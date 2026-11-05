@@ -1,10 +1,9 @@
 import { readFile } from 'node:fs/promises'
 import pg from 'pg'
+import { resolveScriptDb } from './db-target.ts'
 
-const url = process.env.DATABASE_URL
-if (!url) {
-  throw new Error('DATABASE_URL is not set')
-}
+const { url, host, target } = resolveScriptDb(process.env)
+console.log(`대상 DB: ${host} (${target})`)
 
 const sql = await readFile(new URL('../db/init.sql', import.meta.url), 'utf8')
 const client = new pg.Client({ connectionString: url })

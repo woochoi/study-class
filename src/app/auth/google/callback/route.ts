@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { handleGoogleCallback } from '@/lib/auth/callback.ts'
 import { OAUTH_COOKIE } from '@/lib/auth/oauth-cookie.ts'
+import { appUrl } from '@/lib/env.ts'
 import { SESSION_COOKIE } from '@/lib/auth/session.ts'
 
 export async function GET(request: NextRequest) {
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
     oauthCookie,
   })
 
-  const res = NextResponse.redirect(new URL(result.redirectTo, process.env.APP_URL), 303)
+  const res = NextResponse.redirect(new URL(result.redirectTo, appUrl()), 303)
   if (result.ok) {
     res.cookies.set(SESSION_COOKIE, result.token, {
       httpOnly: true,

@@ -8,11 +8,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --env-file=.env --test-concurrency=1 --conditions=react-server --import ./test/use-test-db.ts --test \"src/**/*.test.ts\"",
+    "test": "node --env-file=.env --test-concurrency=1 --conditions=react-server --import ./test/use-test-db.ts --test \"src/**/*.test.ts\" \"scripts/**/*.test.ts\"",
     "sync:laws": "node --env-file=.env scripts/sync-laws.ts",
     "seed": "node --env-file=.env scripts/seed.ts",
     "db:apply": "node --env-file=.env scripts/db-apply.ts",
-    "db:apply:test": "node --env-file=.env --import ./test/use-test-db.ts scripts/db-apply.ts"
+    "db:apply:test": "node --env-file=.env --import ./test/use-test-db.ts scripts/db-apply.ts",
+    "db:apply:neon": "DB_TARGET=neon node --env-file=.env.neon scripts/db-apply.ts",
+    "seed:neon": "DB_TARGET=neon node --env-file=.env.neon scripts/seed.ts",
+    "sync:laws:neon": "DB_TARGET=neon node --env-file=.env.neon scripts/sync-laws.ts"
   },
   "dependencies": {
     "next": "16.4.4",

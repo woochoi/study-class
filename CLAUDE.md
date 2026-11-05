@@ -35,7 +35,7 @@ https://www.law.go.kr/LSW/lsStmdInfoP.do?lsiSeq=213857&ancYnChk=0
 
 ### 1.4 비목표 (이번 구현에서는 하지 않는 것)
 - 별도 REST API (`app/api/*` Route Handler 포함), Express · NestJS · Spring Boot 같은 별도 백엔드 (예외: 구글 OAuth 콜백 `src/app/auth/google/callback/route.ts` 하나)
-- Supabase 연동 및 Render 배포 (설계만 이전 가능하게 해 두고 실제 이전은 하지 않음)
+- Vercel + Neon 배포는 `docs/superpowers/specs/2026-11-05-vercel-neon-deploy-design.md`로 진행 (다른 플랫폼은 비목표)
 - Redux · Zustand · React Query 같은 상태 관리 라이브러리, ORM(Prisma, Drizzle 등)
 
 

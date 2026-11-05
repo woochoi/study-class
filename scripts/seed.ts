@@ -1,12 +1,11 @@
 import { readFile } from 'node:fs/promises'
 import pg from 'pg'
+import { resolveScriptDb } from './db-target.ts'
 import { buildSeedData } from '../src/lib/study/hub-data.ts'
 import { saveSeedData } from '../src/lib/study/seed.ts'
 
-const url = process.env.DATABASE_URL
-if (!url) {
-  throw new Error('DATABASE_URL is not set')
-}
+const { url, host, target } = resolveScriptDb(process.env)
+console.log(`대상 DB: ${host} (${target})`)
 
 const read = async (f: string) =>
   JSON.parse(await readFile(new URL(`../db/seed/${f}`, import.meta.url), 'utf8'))

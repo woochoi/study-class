@@ -1,17 +1,15 @@
 import pg from 'pg'
+import { resolveScriptDb } from './db-target.ts'
 import { fetchAllLawSources } from './law-sources.ts'
 import { saveLawData } from '../src/lib/law/sync.ts'
 
 const oc = process.env.LAW_API_OC
 if (!oc) {
-  console.error('LAW_API_OC가 설정되지 않았습니다. open.law.go.kr에서 OC를 발급받아 .env에 LAW_API_OC=... 로 추가하세요.')
+  console.error('LAW_API_OC가 설정되지 않았습니다. open.law.go.kr에서 OC를 발급받아 .env(운영은 .env.neon)에 LAW_API_OC=... 로 추가하세요.')
   process.exit(1)
 }
-const url = process.env.DATABASE_URL
-if (!url) {
-  console.error('DATABASE_URL is not set')
-  process.exit(1)
-}
+const { url, host, target } = resolveScriptDb(process.env)
+console.log(`대상 DB: ${host} (${target})`)
 
 const fetchJson = async (u: string): Promise<unknown> => {
   const res = await fetch(u)
