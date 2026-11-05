@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { buildAuthUrl, createPkcePair } from '@/lib/auth/google.ts'
+import { appUrl, requiredEnv } from '@/lib/env.ts'
 import {
   OAUTH_COOKIE,
   OAUTH_COOKIE_MAX_AGE_SECONDS,
@@ -28,8 +29,8 @@ export async function signInWithGoogle(formData: FormData): Promise<void> {
 
   redirect(
     buildAuthUrl({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      redirectUri: `${process.env.APP_URL ?? ''}/auth/google/callback`,
+      clientId: requiredEnv('GOOGLE_CLIENT_ID'),
+      redirectUri: `${appUrl()}/auth/google/callback`,
       state,
       codeChallenge: challenge,
     }),

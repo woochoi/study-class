@@ -2,6 +2,7 @@ import 'server-only'
 import { exchangeCode } from './google.ts'
 import { upsertGoogleUser } from './users.ts'
 import { createSession } from './session.ts'
+import { appUrl, requiredEnv } from '../env.ts'
 import { decodeOAuthCookie, safeReturnTo } from './oauth-cookie.ts'
 
 export type CallbackResult =
@@ -31,9 +32,9 @@ export async function handleGoogleCallback(input: {
     const profile = await exchange({
       code: input.code,
       verifier: saved.verifier,
-      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
-      redirectUri: `${process.env.APP_URL ?? ''}/auth/google/callback`,
+      clientId: requiredEnv('GOOGLE_CLIENT_ID'),
+      clientSecret: requiredEnv('GOOGLE_CLIENT_SECRET'),
+      redirectUri: `${appUrl()}/auth/google/callback`,
     })
     const user = await upsertGoogleUser(profile)
     const { token, expiresAt } = await createSession(user.id)
