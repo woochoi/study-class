@@ -248,10 +248,11 @@ erDiagram
 
 `docs/sources/`의 PDF·엑셀은 교차 검증용으로만 보관하며 앱은 읽지 않는다.
 
-## 5. Supabase / Neon 이전 시 주의
+## 5. Neon / Supabase 이전 시 주의
 
-표준 PostgreSQL이므로 `db/init.sql`을 그대로 실행하고 `DATABASE_URL`만 바꾸면 된다. 확인할 점:
+표준 PostgreSQL이므로 `db/init.sql`을 그대로 실행하고 `DATABASE_URL`만 바꾸면 된다. 실제 운영은 Vercel + Neon이며 절차는 README의 "배포 (Vercel + Neon)"를 따른다. 확인할 점:
 
-1. **SSL**: 접속 문자열에 `sslmode=require`가 필요하다.
-2. **커넥션 풀러 주소**: Supabase는 Supavisor, Neon은 `-pooler` 호스트를 사용한다. 서버리스·다중 인스턴스 환경에서는 풀러 주소를 쓴다.
-3. **RLS 활성화**: Supabase에서는 모든 테이블에 Row Level Security를 활성화한다. 접속이 서버 전용(서버 코드에서만 DB 접근)이므로 정책은 비워도 된다.
+1. **SSL**: Neon이 주는 `sslmode=require` 문자열을 그대로 넣는다. `sslmode` 정규화(`verify-full`)는 코드(`src/lib/db-config.ts`)가 한다.
+2. **pooled / direct 구분**: Neon은 호스트에 `-pooler`가 붙은 pooled 주소와 붙지 않은 direct 주소를 준다. 서버리스 앱(Vercel)의 `DATABASE_URL`에는 pooled를, 스키마 적용·seed·법령 동기화(`npm run db:apply:neon` 등, `.env.neon`)에는 direct를 쓴다. 앱 풀은 최대 5개, 유휴 10초다.
+3. **운영/로컬 혼동 방지**: `*:neon` 명령은 `.env.neon`만 읽고 `.neon.tech` 호스트가 아니면 거부하며, 로컬 명령·테스트는 Neon 호스트를 거부한다.
+4. **(대안) Supabase**: 모든 테이블에 Row Level Security를 활성화한다. 접속이 서버 전용(서버 코드에서만 DB 접근)이므로 정책은 비워도 된다. 풀러는 Supavisor를 쓴다. 이번 구현에서는 실제로 이전하지 않는다.
