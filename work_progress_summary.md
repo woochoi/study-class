@@ -1,6 +1,7 @@
 # 작업 히스토리 복기 — ISMS-P 온라인 스터디 까페
 
 > 2026-11-03 하루 동안 Claude와 함께 CLAUDE.md의 1~8단계를 끝까지 진행한 기록이다.
+> 2026-11-05에는 Vercel + Neon 운영 배포를 진행했다 ([3.7](#37-plan-4--vercel--neon-배포-2026-11-05)).
 > 무엇을 만들었는지보다 **어떤 순서로, 어떤 판단을 하며, 어디서 막혔고 어떻게 풀었는지**를 다시 배우기 위해 정리했다.
 
 ---
@@ -174,6 +175,52 @@
 - dev 서버도 재시작했다 → 로그인과 시험일(2026-12-05)이 유지됐다.
 - README에 "데이터 유지 확인" 절차를 추가했다 (6de0868). 남아 있던 임시 폴더를 지우고, dev 서버를 껐다.
 
+### 3.7 Plan 4 — Vercel + Neon 배포 (2026-11-05)
+
+**결과**: 운영 주소 https://ismsp-study-class.vercel.app 가 Neon DB에 연결되어 동작하고, 구글 로그인도 된다. README 배포 체크리스트 1~10단계를 마쳤고, 남은 일은 [TODO.md](TODO.md)에 있다.
+
+| 시각 | 한 일 |
+|---|---|
+| 11:54 | 배포 설계 (fb1ad96). 지인 약 20명 공개, 모두 0에서 시작, Vercel 무료 주소 |
+| 11:59 | Plan 4 작성 (810fa91) |
+| 14:15~14:33 | subagent-driven으로 태스크 6개 구현, 최종 리뷰 수정까지 커밋 8개 (테스트 141개 통과) |
+| 16:59 | PR #1 병합 (`feature/vercel-neon` → master) |
+| 오후 | Neon 프로젝트 생성 → 스키마 적용 → 법령 동기화 → 학습 데이터 적재 |
+| 저녁 | Vercel 프로젝트 생성 → 리전·구글·환경 변수 설정 → 다시 배포 → 로그인 성공 |
+| 20:22 | PR #2 병합: 처리방침 확정, master push로 운영에 자동 배포됨 |
+
+**코드로 만든 것** (`feature/vercel-neon`)
+- `src/lib/db-config.ts`: SSL 설정을 인증서 검증(`verify-full`)으로 바꾼다. 연결 풀은 최대 5개, 유휴 10초다. 연결 문자열이 깨져 있어도 오류에 비밀번호가 찍히지 않는다.
+- `src/lib/env.ts`: `APP_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`이 비면 바로 알려 준다. `/health`는 요청 시점에만 DB를 읽어서 DB 없이도 빌드된다.
+- `db:apply:neon`, `sync:laws:neon`, `seed:neon`: `.env.neon`만 읽고 대상 호스트를 먼저 출력한다.
+  - 운영 명령은 Neon이 아니면 멈춘다.
+  - 로컬 명령과 테스트는 Neon이면 멈춘다.
+- `docs/ops/delete-user.sql`: 탈퇴 요청이 오면 운영자가 손으로 지우는 절차다. 같은 이메일이 0명이거나 2명 이상이면 아무것도 지우지 않는다.
+- `/privacy`: 개인정보 처리방침 페이지다(법 제30조 항목, 쿠키, 국외 이전). 모든 화면 아래에 링크가 있다.
+
+**콘솔에서 한 것**
+
+| 서비스 | 설정 |
+|---|---|
+| Neon | 프로젝트 `study-class`, 싱가포르(ap-southeast-1), Postgres 17, DB `my_study_cafe`. direct 주소는 `.env.neon`에, pooled(`-pooler`) 주소는 Vercel에 넣었다. |
+| 국가법령정보 OPEN API | 집 공인 IP를 서버장비 IP로 등록했다. |
+| Vercel | 프로젝트 `ismsp-study-class`(`study-class`는 이미 다른 사람이 쓰고 있었다). Function Region은 iad1을 끄고 sin1만 켰다. 환경 변수 4개를 Production에만 Secret으로 넣었다. |
+| 구글 | 리디렉션 URI에 운영 주소의 `/auth/google/callback`을 추가했다. 새 secret을 발급했고, 이전 secret은 아직 켜 두었다. |
+
+**확인한 것**
+- Neon에 테이블 19개가 생겼다. 참조 데이터 12개 테이블의 건수가 로컬과 똑같다(조문 420, 카드 242 등). 사용자와 질문은 0에서 시작한다.
+- 앱에서 Neon까지는 TLS 1.3이고 인증서 검증을 통과한다. 서버의 `pg_stat_ssl`은 `false`로 나오는데, 프록시가 TLS를 끝내기 때문이다.
+- 운영 `/health`는 `DB 연결: OK`이고, 주요 화면은 모두 200이며 응답은 0.7~1초다.
+- 로그인 버튼이 구글로 보내는 `redirect_uri`가 운영 주소와 일치한다. 사용자가 직접 로그인해 첫 사용자가 생겼다.
+
+> 💡 배운 점
+> - **콘솔 단계는 사람이, 확인은 Claude가 나눠 맡았다.** 계정 로그인, 이메일 인증, secret 복사는 사용자가 했다. Claude는 대상 호스트, 테이블 수, `redirect_uri`, 응답 코드를 값은 보지 않고 확인했다.
+> - **비밀 값은 채팅과 스크린샷으로도 샌다.** DB 주소를 채팅에 붙이거나, 값이 보이는 화면을 캡처하면 노출된다. 노출될 때마다 바로 고치기보다, 동작을 먼저 확인하고 마지막에 한 번에 교체하기로 했다.
+> - **도구가 제안하는 자동 설정은 프로젝트 규칙과 부딪칠 수 있다.** Neon이 준 에이전트 프롬프트는 `neon deploy`로 연결 정보를 `.env`에 쓰는데, 이 프로젝트는 `.env`에 Neon 주소를 넣지 않는다는 규칙이 있다. 그래서 쓰지 않았다.
+> - **기본값을 확인한다.** Vercel 함수 리전은 처음에 미국(iad1)으로 체크되어 있었다. DB가 싱가포르에 있으니 함수도 싱가포르에 둬야 질의마다 태평양을 건너지 않는다.
+> - **이름은 먼저 확보한다.** `study-class.vercel.app`은 이미 있었다. 빈 이름인지 확인한 뒤, 환경 변수 없이 첫 배포를 해서 주소부터 확보했다.
+> - **병합한 기능 브랜치는 기록으로 남긴다** (`feature/vercel-neon`, `feature/privacy-finalize`).
+
 ---
 
 ## 4. 기술적으로 배운 것 정리
@@ -212,20 +259,15 @@
 
 ## 6. 남은 일 (다음에 할 것)
 
-**미뤄 둔 기능**
-- 개인정보보호위원회 결정문 API (3단 화면 아래 "관련 결정문" 칸은 자리만 있다)
-- 시험문제 풀이 · 오답노트
-- 복습 퀴즈 (B안 계단식 화면 + 간격 반복 1→3→7→14→30일)
-- Supabase/Neon 이전, 배포 (SSL, 커넥션 풀러, RLS는 `docs/DB_DESIGN.md` 참고)
-
-**알려진 작은 문제** (병합을 막지 않는 것)
-- 목록에서 삭제된 질문에도 조문 태그 배지가 보인다 (상세에서는 숨겨진다).
-- 마지막 페이지보다 뒤 페이지를 열면 "아직 질문이 없어요"라고 나온다 (질문이 있는데도).
-- 두 사람이 정확히 동시에 질문 삭제와 답변 작성을 하면, 방금 단 답변이 함께 지워질 수 있다 (매우 드묾).
-- 삭제가 실패해도 아무 안내 없이 페이지만 이동한다.
-
-**권장**
-- 채팅에 노출됐던 구글 client secret은 Google Cloud Console에서 다시 발급하고 `.env`를 갱신한다.
+남은 일은 **[TODO.md](TODO.md)** 한 곳에서 관리한다 (2026-11-05부터).
+- 지인 공개 전에 할 일
+  - 동의 화면 프로덕션 게시
+  - 다른 계정으로 완료 기준 확인
+  - 비밀 값 교체
+  - 처리방침 Neon 연락처 확인
+  - 삭제 SQL 시험 실행
+- 미뤄 둔 기능: 결정문 API, 시험문제·오답노트, 복습 퀴즈
+- 알려진 작은 문제: 게시판 4건, 배포 준비 5건
 
 ---
 
@@ -250,6 +292,8 @@ npm test
 - 법령 원문을 새로 받으려면 `npm run sync:laws`를 실행한다 (등록된 IP에서만 동작).
 - 학습 데이터를 다시 넣으려면 `npm run seed`를 실행한다 (여러 번 실행해도 id가 유지된다).
 - 브라우저는 `http://localhost:3000`으로 연다 (`127.0.0.1`과 섞으면 로그인 쿠키가 깨진다).
+- 운영(Neon) DB에 적용할 때는 `npm run db:apply:neon` / `sync:laws:neon` / `seed:neon`을 쓴다. 출력된 `대상 DB:` 호스트를 꼭 확인한다.
+- 운영 배포는 master에 push하면 자동으로 된다. 결과는 `https://ismsp-study-class.vercel.app/health`에서 확인한다.
 
 ## 8. 참고 문서
 
@@ -257,5 +301,7 @@ npm test
 - [PRD.md](PRD.md), [docs/DB_DESIGN.md](docs/DB_DESIGN.md)
 - [설계 스펙](docs/superpowers/specs/2026-11-03-study-cafe-mvp-design.md)
 - [Plan 1](docs/superpowers/plans/2026-11-03-plan1-foundation-google-login.md) · [Plan 2](docs/superpowers/plans/2026-11-03-plan2-dashboard-three-tier.md) · [Plan 3](docs/superpowers/plans/2026-11-03-plan3-question-board.md)
+- [배포 설계](docs/superpowers/specs/2026-11-05-vercel-neon-deploy-design.md) · [Plan 4](docs/superpowers/plans/2026-11-05-plan4-vercel-neon-deploy.md) · [삭제 요청 절차](docs/ops/README.md)
+- [TODO.md](TODO.md) — 남은 할 일
 - [README.md](README.md) — 실행 방법, 화면, 게시판 규칙, 데이터 유지 확인
 - 전체 커밋 기록: `git log --reverse --oneline`
