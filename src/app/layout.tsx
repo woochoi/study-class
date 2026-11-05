@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import { Suspense } from "react";
 import AuthStatus from "./_components/AuthStatus";
 import "./globals.css";
@@ -31,6 +32,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </Suspense>
         </header>
         {children}
+        <footer className="p-4 text-center text-sm">
+          <Link href="/privacy" className="underline">
+            개인정보 처리방침
+          </Link>
+        </footer>
       </body>
     </html>
   );
