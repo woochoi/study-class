@@ -21,8 +21,18 @@ export function normalizeConnectionString(url: string): string {
   return url.replace(/([?&]sslmode=)[^&#]*/, '$1verify-full')
 }
 
+// 잘못된 문자열이면 Node의 ERR_INVALID_URL이 입력 원문(비밀번호 포함)을 달고 던져지므로,
+// 입력도 cause도 없는 오류로 바꿔 던진다.
+function parseUrl(url: string): URL {
+  try {
+    return new URL(url)
+  } catch {
+    throw new Error('DATABASE_URL을 해석할 수 없습니다.')
+  }
+}
+
 export function dbHost(url: string): string {
-  return new URL(url).hostname
+  return parseUrl(url).hostname
 }
 
 function isNeonHost(host: string): boolean {

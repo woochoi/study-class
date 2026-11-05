@@ -60,3 +60,17 @@ test('assertTarget', () => {
 test('POOL_OPTIONS', () => {
   assert.deepEqual(POOL_OPTIONS, { max: 5, idleTimeoutMillis: 10_000, connectionTimeoutMillis: 10_000 })
 })
+
+test('잘못된 연결 문자열 오류에는 비밀값이 담기지 않는다', () => {
+  const bad = 'postgresql://u:secretpw@[bad host/db'
+  for (const fn of [() => dbHost(bad), () => assertTarget(bad, 'local'), () => assertTarget(bad, 'neon')]) {
+    assert.throws(fn, (err: Error) => {
+      assert.equal(err.message, 'DATABASE_URL을 해석할 수 없습니다.')
+      assert.equal(err.cause, undefined)
+      const dump = JSON.stringify(err, Object.getOwnPropertyNames(err)) + String(err)
+      assert.ok(!dump.includes('secretpw'))
+      assert.ok(!Object.values(err).some((v) => String(v).includes('secretpw')))
+      return true
+    })
+  }
+})
