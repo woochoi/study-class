@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Suspense } from "react";
 import AuthStatus from "./_components/AuthStatus";
+import ThemeToggle from "./_components/ThemeToggle";
+import { THEME_INIT_SCRIPT } from "@/lib/theme.ts";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,8 +27,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // data-theme은 아래 스크립트가 하이드레이션 전에 붙이므로 서버 HTML과 다를 수 있다.
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col"><header className="flex justify-end p-4">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="min-h-full flex flex-col"><header className="flex items-center justify-end gap-2 p-4">
+          <ThemeToggle />
           <Suspense fallback={null}>
             <AuthStatus />
           </Suspense>
