@@ -3,9 +3,10 @@ import type { DocKind } from './types.ts'
 
 export type RefSegment = { text: string; key?: string }
 
-const REF = /제(\d+)조(?:의(\d+))?/g
+// 조 뒤에 이어지는 항·호(의M)·목도 한 조각에 묶는다(예: 제2조제6호나목). 링크 키는 조까지만.
+const REF = /제(\d+)조(?:의(\d+))?(?:제\d+항)?(?:제\d+호(?:의\d+)?)?(?:[가-하]목)?/g
 
-/** 본문에서 `제N조`, `제N조의M` 참조를 찾아 조각으로 나눈다. 조각 text를 이으면 원문과 같다. */
+/** 본문에서 `제N조`, `제N조의M`(+항·호·목) 참조를 찾아 조각으로 나눈다. 조각 text를 이으면 원문과 같다. */
 export function splitArticleRefs(text: string): RefSegment[] {
   const out: RefSegment[] = []
   let last = 0

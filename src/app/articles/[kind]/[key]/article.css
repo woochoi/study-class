@@ -1,3 +1,10 @@
+/* 조문 화면 표기 색 (국가법령정보센터 3단 비교 화면 기준). 테마 규칙은 study.css와 같다. */
+:root{--art-title:#16337a;--art-rev:#1f55d1;--art-law:#1a4fd6;--art-ref:#0f2c84}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--art-title:#a9c4ff;--art-rev:#86aaff;--art-law:#8fb4ff;--art-ref:#bcd0ff}}
+:root[data-theme="dark"]{--art-title:#a9c4ff;--art-rev:#86aaff;--art-law:#8fb4ff;--art-ref:#bcd0ff}
+
+/* 창 너비에 맞춰 세 칸이 넓어지고 줄어든다 */
+.study .wrap.wide{max-width:none}
 .study .tiers{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin:16px 0 24px}
 @media (min-width:768px){.study .tiers{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .study .tier-col{display:grid;gap:12px;align-content:start;min-width:0}
@@ -5,8 +12,18 @@
 .study .tier-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0}
 .study .tier-card.current{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 .study .tier-card h3{font-size:15px;margin-bottom:8px}
-.study .tier-body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
-.study .tier-body a{color:var(--accent);text-decoration:underline}
+.study .tier-body{overflow-wrap:anywhere;font-size:15px;line-height:1.85}
+/* 줄마다 내어쓰기: 첫 줄은 번호(①, 1., 가.)에서 시작하고 넘어간 줄은 번호 뒤 글자에 맞춘다 */
+.study .tier-body .ln{margin:0}
+.study .tier-body .d0{padding-left:1em;text-indent:-1em}
+.study .tier-body .d1{padding-left:2.4em;text-indent:-1.4em}
+.study .tier-body .d2{padding-left:3.4em;text-indent:-1.4em}
+.study .tier-body .d3{padding-left:4.4em;text-indent:-1.4em}
+.study .tier-body .art-title{color:var(--art-title);font-weight:700}
+.study .tier-body .art-rev{color:var(--art-rev)}
+.study .tier-body .art-law{color:var(--art-law);text-decoration:underline;text-underline-offset:2px}
+.study .tier-body a{color:var(--art-ref);text-decoration:underline;text-underline-offset:2px}
+.study .tier-body a.art-law{color:var(--art-law)}
 .study .upcoming{font-size:12px;color:var(--warn);margin:0 0 8px}
 .study .meta ul{margin:0 0 12px;padding-left:18px;font-size:13px}
 .study .hint{color:var(--muted);font-size:13px}
