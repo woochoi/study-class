@@ -25,13 +25,22 @@ test('제N항/제N호/조 없는 숫자는 링크 아님', () => {
   assert.deepEqual(keys('제3항 제2호 17 제5조의 규정'), ['5'])
 })
 
+test('조 뒤의 항·호·목까지 한 링크 조각으로 묶는다(키는 조)', () => {
+  const linked = (s: string) => splitArticleRefs(s).flatMap((p) => (p.key ? [[p.text, p.key]] : []))
+  assert.deepEqual(linked('법 제2조제6호나목에서'), [['제2조제6호나목', '2']])
+  assert.deepEqual(linked('제3조제1항에 따른'), [['제3조제1항', '3']])
+  assert.deepEqual(linked('제2조제1호의2에 따라'), [['제2조제1호의2', '2']])
+  assert.deepEqual(linked('제28조의8제1항제3호가목'), [['제28조의8제1항제3호가목', '28의8']])
+  assert.deepEqual(linked('제5조에 따라'), [['제5조', '5']])
+})
+
 test('숫자 없는 텍스트는 조각 1개', () => {
   assert.deepEqual(splitArticleRefs('개인정보 처리방침'), [{ text: '개인정보 처리방침' }])
   assert.deepEqual(splitArticleRefs(''), [])
 })
 
 test('모든 조각의 text를 이으면 원문과 같다', () => {
-  for (const s of ['제2조 정의, 제24조의2 주민등록번호', '제28조의8~11 국외 이전', '제39조~제40조 유출', '고시 제7조', '제3항']) {
+  for (const s of ['제2조 정의, 제24조의2 주민등록번호', '제28조의8~11 국외 이전', '제39조~제40조 유출', '고시 제7조', '제3항', '법 제2조제6호나목에서']) {
     assert.equal(join(s), s)
   }
 })

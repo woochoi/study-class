@@ -8,15 +8,17 @@ type Props = {
   kind: DocKind
   /** 각 조각의 글자를 가공(검색어 강조 등). 링크는 유지된다. */
   render?: (s: string) => ReactNode
+  /** text 앞에 오는 같은 줄의 글자. 「법령명」 등으로 나뉘어 들어온 조각도 어느 법령의 조인지 판단하게 한다. */
+  context?: string
 }
 
-export default function ArticleRefText({ text, kind, render }: Props) {
+export default function ArticleRefText({ text, kind, render, context = '' }: Props) {
   return (
     <>
       {splitArticleRefs(text).map((seg, i, segs) => {
         const inner = render ? render(seg.text) : seg.text
         if (!seg.key) return <span key={i}>{inner}</span>
-        const refKind = refKindFor(segs.slice(0, i).map((x) => x.text).join(''), kind)
+        const refKind = refKindFor(context + segs.slice(0, i).map((x) => x.text).join(''), kind)
         // 다른 법령의 조 참조는 이 사이트에 없으므로 링크하지 않는다.
         if (refKind === null) return <span key={i}>{inner}</span>
         return (

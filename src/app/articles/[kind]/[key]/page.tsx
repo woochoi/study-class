@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { connection } from 'next/server'
-import ArticleRefText from '@/app/_components/ArticleRefText.tsx'
+import ArticleBody from './ArticleBody.tsx'
 import { formatArticleKey } from '@/lib/law/article-key.ts'
 import { getThreeTier, parseArticleParams, type ArticleView } from '@/lib/law/three-tier.ts'
 import { countQuestionsForTag } from '@/lib/board/questions-db.ts'
@@ -27,17 +27,12 @@ function dotDate(iso: string): string {
 function Card({ a, column, current }: { a: ArticleView; column: DocKind; current: boolean }) {
   return (
     <article className={current ? 'tier-card current' : 'tier-card'}>
-      <h3>
+      {/* 본문 첫머리에 조문 제목이 굵게 나오므로 제목 머리글은 화면 읽기 도구에만 둔다 */}
+      <h3 className="sr-only">
         {formatArticleKey(a.key)}({a.title})
       </h3>
       {a.doc.isUpcoming && <p className="upcoming">🔜 {dotDate(a.doc.effectiveOn)} 시행</p>}
-      <div className="tier-body">
-        {(a.body ?? '').split('\n').map((line, i) => (
-          <div key={i}>
-            <ArticleRefText text={line} kind={column} />
-          </div>
-        ))}
-      </div>
+      <ArticleBody body={a.body ?? ''} kind={column} />
     </article>
   )
 }
@@ -67,7 +62,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ kind: 
     .at(-1)
   return (
     <div className="study">
-      <div className="wrap">
+      <div className="wrap wide">
         <p>
           <Link href="/">← 처음으로</Link>
         </p>
