@@ -2,6 +2,8 @@
 
 ISMS-P(정보보호 및 개인정보보호 관리체계 인증 심사 전문가) 대비를 위해 개인정보보호법을 함께 공부하고, 문의 게시판으로 질문·답변을 나누는 온라인 스터디 사이트입니다. (Next.js + PostgreSQL)
 
+**운영 주소: https://ismsp-study-class.vercel.app** (Vercel + Neon, 배포 방법은 아래 [배포 (Vercel + Neon)](#배포-vercel--neon) 참고)
+
 ## 사전 준비
 
 - Node.js 24
